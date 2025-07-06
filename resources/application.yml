@@ -11,8 +11,8 @@ swagger :
   host: "http://13.127.47.0:8001/swagger/index.html"
 
 server :
-  host: "http://localhost:8001"
-  port: 8001
+  host: "http://localhost:8002"
+  port: 8002
 
 keycloak: 
   resources: ["accounts", "business", "brands", "properties"]
