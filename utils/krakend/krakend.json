@@ -1,0 +1,134 @@
+{
+    "endpoints": [
+        {
+            "endpoint": "/v1/role",
+            "method": "POST",
+            "input_query_strings": [
+                "*"
+            ],
+            "input_headers": [
+                "Authorization"
+            ],
+            "backend": [
+                {
+                    "url_pattern": "/v1/role",
+                    "encoding": "no-op",
+                    "host": [
+                        "SERVER_HOST"
+                    ],
+                    "extra_config": {}
+                }
+            ],
+            "extra_config": {
+                "plugin/auth-keyclock": {
+                    "auth": true
+                }
+            },
+            "output_encoding": "no-op"
+        },
+        {
+            "endpoint": "/v1/role",
+            "method": "GET",
+            "input_query_strings": [
+                "*"
+            ],
+            "input_headers": [
+                "Authorization"
+            ],
+            "backend": [
+                {
+                    "url_pattern": "/v1/role",
+                    "encoding": "no-op",
+                    "host": [
+                        "SERVER_HOST"
+                    ],
+                    "extra_config": {}
+                }
+            ],
+            "extra_config": {
+                "plugin/auth-keyclock": {
+                    "auth": true
+                }
+            },
+            "output_encoding": "no-op"
+        },
+        {
+            "endpoint": "/v1/role",
+            "method": "PATCH",
+            "input_query_strings": [
+                "*"
+            ],
+            "input_headers": [
+                "Authorization"
+            ],
+            "backend": [
+                {
+                    "url_pattern": "/v1/role",
+                    "encoding": "no-op",
+                    "host": [
+                        "SERVER_HOST"
+                    ],
+                    "extra_config": {}
+                }
+            ],
+            "extra_config": {
+                "plugin/auth-keyclock": {
+                    "auth": true
+                }
+            },
+            "output_encoding": "no-op"
+        },
+        {
+            "endpoint": "/v1/role",
+            "method": "DELETE",
+            "input_query_strings": [
+                "*"
+            ],
+            "input_headers": [
+                "Authorization"
+            ],
+            "backend": [
+                {
+                    "url_pattern": "/v1/role",
+                    "encoding": "no-op",
+                    "host": [
+                        "SERVER_HOST"
+                    ],
+                    "extra_config": {}
+                }
+            ],
+            "extra_config": {
+                "plugin/auth-keyclock": {
+                    "auth": true
+                }
+            },
+            "output_encoding": "no-op"
+        },
+        {
+            "endpoint": "/role/status",
+            "method": "PATCH",
+            "input_query_strings": [
+                "*"
+            ],
+            "input_headers": [
+                "Authorization"
+            ],
+            "backend": [
+                {
+                    "url_pattern": "/role/status",
+                    "encoding": "no-op",
+                    "host": [
+                        "SERVER_HOST"
+                    ],
+                    "extra_config": {}
+                }
+            ],
+            "extra_config": {
+                "plugin/auth-keyclock": {
+                    "auth": true
+                }
+            },
+            "output_encoding": "no-op"
+        }
+    ]
+}

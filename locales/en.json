@@ -1,0 +1,31 @@
+{
+    "common": {
+        "200": "Success",
+        "400": "{{.Fields}} field missing/invalid.",
+        "401": "The request requires authentication to access the resource, and the client did not send any credentials, or the credentials that were sent are wrong.",
+        "404": "The server has not found any entry to match the request that it was given.",
+        "406": "Token Expired.",
+        "429": "Too Many Requests.",
+        "500": "The server encountered an unexplained problem which has prevented it from executing the given request",
+        "503": "The server is currently unable to handle the request it was sent due to maintenance or an overload on its resources. This is a typical condition that may be relieved later on, so the client can try again."
+    },
+    "errors": {
+        "DataNotDeleted": "Data could not be deleted.",
+        "DataNotUpdated": "Data could not be updated.",
+        "AccountsDataNotFound": "Institution data not found.",
+        "RoleNotFound": "Role not found.",
+        "UserNotFound": "User not found.",
+        "UserNotActive": "Your account has not active , please contact our app support team for any further queries",
+        "SupportedLanguageNotFound": "Supported language not found.",
+        "CurrencyNotFound": "Currency not found.",
+        "StateTaxNotFound": "State tax not found.",
+        "AccountTypeNotFound": "Account type not found.",
+        "InvalidOldPassword": "Old password is invalid.",
+        "PasswordDoesNotMatch": "New Password is not same as Confirm New Password.",
+        "OldPasswordAndNewPasswordSame": "Old password and new password cannot be same.",
+        "BusinessIdIsRequired": "businessId is required.",
+        "BrandIdIsRequired": "brandId is required.",
+        "InvalidOTP": "invalid otp provided",
+        "UserAlreadyExists" : "user with this phone number already exists"
+    }
+}

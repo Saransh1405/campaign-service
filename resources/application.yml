@@ -1,0 +1,31 @@
+http:
+  connectTimeoutInMillis: 10000
+  keepAliveDurationInMillis: 30000
+  maxIdleConnections: 100
+  idleConnectionTimeoutInMillis: 90000
+  tlsHandshakeTimeoutInMillis: 10000
+  expectContinueTimeoutInMillis: 1000
+  timeoutInMillis: 15000
+  
+swagger :
+  host: "http://13.127.47.0:8001/swagger/index.html"
+
+server :
+  host: "http://localhost:8001"
+  port: 8001
+
+keycloak: 
+  resources: ["accounts", "business", "brands", "properties"]
+  resourcesListOfBusiness: ["business", "brands", "properties"]
+  resourcesListOfBrand: ["brands", "properties"]
+  resourcesListOfProperty: ["properties"]
+  scopes: ["read","write"]
+  policies: ["accounts-read","accounts-write", "business-read", "business-write", "brands-read", "brands-write", "properties-read", "properties-write"]
+  policiesForBusiness: ["business-read", "business-write", "brands-read", "brands-write", "properties-read", "properties-write"]
+  policiesForBrand: ["brands-read", "brands-write", "properties-read", "properties-write"]
+  policiesForProperty: ["properties-read", "properties-write"]
+  permissions: ["accounts-read-permission","accounts-write-permission", "business-read-permission", "business-write-permission", "brands-read-permission", "brands-write-permission", "properties-read-permission", "properties-write-permission"]
+  permissionsForBusiness: ["business-read-permission", "business-write-permission", "brands-read-permission", "brands-write-permission", "properties-read-permission", "properties-write-permission"]
+  permissionsForBrand: ["brands-read-permission", "brands-write-permission", "properties-read-permission", "properties-write-permission"]
+  permissionsForProperty: ["properties-read-permission", "properties-write-permission"]
+  defaultAdminRoles: ["Admin"] # if any change here then need to change in create Realm page role name

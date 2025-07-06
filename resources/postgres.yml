@@ -1,0 +1,7 @@
+host: 13.127.47.0
+user: cordelia_cruise
+password: Cordelia@123
+dbname: cordelia
+port: 5432
+sslmode: disable
+timeZone: Asia/Kolkata
