@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"users-service/api"
 	"users-service/constants"
+	"users-service/library/kafka"
 	"users-service/library/postgres"
+	"users-service/library/redis_provider"
 	"users-service/logger"
 	"users-service/utils"
 
@@ -45,6 +47,15 @@ func main() {
 
 	// Connect a postgres
 	postgres.InitPostgresDB(ctx)
+
+	// Connect a kafka
+	kafka.NewConnection()
+
+	// Connect a redis
+	err := redis_provider.NewConnection(ctx, logger.GetLoggerWithoutContext())
+	if err != nil {
+		logger.GetLoggerWithoutContext().With(zap.Error(err)).Error(constants.ExternalServiceFailureError)
+	}
 
 	// Start router and Use middleware
 	startRouter(ctx)

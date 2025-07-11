@@ -16,15 +16,16 @@ var Client *redis.Client
 var RatePerMinute int = 2 // Rate per minute Default to 2
 
 func NewConnection(ctx context.Context, log logger.Logger) error {
-
-	RedisConfig, err := configs.Get(constants.RedisConfig)
-
+	// get application configs
+	applicationConfig, err := configs.Get(constants.ApplicationConfig)
 	if err != nil {
 		log.With(zap.Error(err)).Error(constants.BindingFailedErrr)
 	}
 
-	redisUrl := RedisConfig.GetString(constants.RedisUrlKey)
-	RatePerMinute = RedisConfig.GetInt(constants.RedisRatePerMinute)
+	// RedisConfig := applicationConfig.Get(constants.RedisConfig)
+
+	redisUrl := applicationConfig.GetString(constants.RedisUrlKey)
+	RatePerMinute = applicationConfig.GetInt(constants.RedisRatePerMinute)
 	if redisUrl == "" {
 		return errors.New("configuration is missing for redis")
 	}
