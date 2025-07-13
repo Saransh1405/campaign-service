@@ -1,11 +1,12 @@
 package redis_provider
 
 import (
+	"campaign-service/constants"
+	"campaign-service/logger"
+	"campaign-service/utils/configs"
 	"context"
 	"errors"
-	"users-service/constants"
-	"users-service/logger"
-	"users-service/utils/configs"
+	"fmt"
 
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
@@ -30,7 +31,16 @@ func NewConnection(ctx context.Context, log logger.Logger) error {
 		return errors.New("configuration is missing for redis")
 	}
 
-	opt, _ := redis.ParseURL(redisUrl)
+	opt, err := redis.ParseURL(redisUrl)
+	if err != nil {
+		log.Error("Failed to parse Redis URL", zap.Error(err), zap.String("redisUrl", redisUrl))
+		return fmt.Errorf("failed to parse Redis URL: %w", err)
+	}
+
+	if opt == nil {
+		log.Error("Redis options are nil after parsing URL", zap.String("redisUrl", redisUrl))
+		return errors.New("Redis options are nil after parsing URL")
+	}
 
 	Client = redis.NewClient(opt)
 

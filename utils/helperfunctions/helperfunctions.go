@@ -1,22 +1,21 @@
 package helperfunctions
 
 import (
+	"campaign-service/constants"
+	"campaign-service/library/postgres"
+	"campaign-service/logger"
+	"campaign-service/models"
+	"campaign-service/utils"
+	"campaign-service/utils/localization"
 	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
 	"time"
-	"users-service/constants"
-	"users-service/library/postgres"
-	"users-service/logger"
-	"users-service/models"
-	"users-service/utils"
-	"users-service/utils/localization"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -62,21 +61,6 @@ func GeneratePassword() string {
 		inRune[i], inRune[j] = inRune[j], inRune[i]
 	})
 	return string(inRune)
-}
-
-func InsertLogsIntoStatusLogs(status models.Status, notes, actionByUserRole, actionByUserId string, entityId uuid.UUID) {
-
-	var statusLogs models.StatusLogs
-
-	statusLogs.Status = status
-	statusLogs.ActionByUserRole = actionByUserRole
-	statusLogs.ActionByUserId = actionByUserId
-	statusLogs.EntityId = entityId
-	statusLogs.Notes = notes
-	statusLogs.Timestamp = time.Now()
-
-	postgres.DB.Create(&statusLogs)
-
 }
 
 func ValidateRequestData(ctx *gin.Context, request interface{}, b binding.Binding) error {

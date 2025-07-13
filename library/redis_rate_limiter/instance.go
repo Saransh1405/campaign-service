@@ -1,10 +1,10 @@
 package redis_rate_limiter
 
 import (
+	"campaign-service/library/redis_provider"
+	"campaign-service/logger"
 	"fmt"
 	"time"
-	"users-service/library/redis_provider"
-	"users-service/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis_rate/v9"

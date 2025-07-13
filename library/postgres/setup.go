@@ -1,11 +1,11 @@
 package postgres
 
 import (
+	"campaign-service/constants"
+	"campaign-service/logger"
+	"campaign-service/models"
+	"campaign-service/utils/configs"
 	"context"
-	"users-service/constants"
-	"users-service/logger"
-	"users-service/models"
-	"users-service/utils/configs"
 
 	"go.uber.org/zap"
 )

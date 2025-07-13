@@ -26,6 +26,13 @@
         "BusinessIdIsRequired": "businessId is required.",
         "BrandIdIsRequired": "brandId is required.",
         "InvalidOTP": "invalid otp provided",
-        "UserAlreadyExists" : "user with this phone number already exists"
+        "UserAlreadyExists" : "user with this phone number already exists",
+        "InvalidStartDate": "Start date cannot be in the past.",
+        "InvalidEndDate": "End date cannot be in the past.",
+        "EndDateBeforeStartDate": "End date must be after start date.",
+        "MaxParticipantsLessThanMinParticipants": "Max participants cannot be less than min participants.",
+        "PriceMustBeGreaterThanZero": "Price must be greater than zero.",
+        "CampaignNameAlreadyExists": "Campaign name already exists.",
+        "CampaignNotFound": "Campaign not found."
     }
 }

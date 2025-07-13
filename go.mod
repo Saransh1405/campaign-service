@@ -1,4 +1,4 @@
-module users-service
+module campaign-service
 
 go 1.23.0
 

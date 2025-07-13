@@ -1,11 +1,11 @@
 package postgres
 
 import (
+	"campaign-service/models"
 	"context"
 	"database/sql"
 	"fmt"
 	"log"
-	"users-service/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -38,99 +38,59 @@ func ConnectDatabase(ctx context.Context, postgresConfig models.PostgresConfig) 
 
 	if postgresConfig.Host != "localhost" {
 
-		// // LOGS TABLE
-		// db.AutoMigrate(&models.Logs{})
+		// Create enum types first
+		createEnumTypes(db)
 
-		// // STATUS LOGS TABLE
-		// db.AutoMigrate(&models.StatusLogs{})
+		// CAMPAIGN TABLE
+		db.AutoMigrate(&models.Campaign{})
 
-		// // ROLE TABLE
-		// db.AutoMigrate(&models.Role{})
+		// LOCATION TABLE
+		db.AutoMigrate(&models.Location{})
 
-		// // ACCOUNTS DATA TABLE
-		// db.AutoMigrate(&models.AccountsData{})
+		// PARTICIPANT TABLE
+		db.AutoMigrate(&models.Participant{})
 
-		// // USER TABLE
-		// db.AutoMigrate(&models.Users{})
+		// CATEGORY TABLE
+		db.AutoMigrate(&models.Category{})
 
-		// // SUPPORTED LANGUAGES TABLE
-		// db.AutoMigrate(&models.SupportedLanguages{})
+		// CAMPAIGN INVITE TABLE
+		db.AutoMigrate(&models.CampaignInvite{})
 
-		// // CURRENCIES TABLE
-		// db.AutoMigrate(&models.Currencies{})
+		// CAMPAIGN REVIEW TABLE
+		db.AutoMigrate(&models.CampaignReview{})
 
-		// // STATE TAXES TABLE
-		// db.AutoMigrate(&models.StateTaxes{})
-
-		// // COUNTRIES TABLE
-		// db.AutoMigrate(&models.Countries{})
-
-		// // COUNTRY LEVEL TAXES TABLE
-		// db.AutoMigrate(&models.CountryLevelTaxes{})
-
-		// // TAX FIELDS TABLE
-		// db.AutoMigrate(&models.TaxFields{})
-
-		// // STATES TABLE
-		// db.AutoMigrate(&models.States{})
-
-		// // BANK ACCOUNT FIELDS TABLE
-		// db.AutoMigrate(&models.BankAccountFields{})
-
-		// // PROPERTY AMENITIES TABLE
-		// db.AutoMigrate(&models.PropertyAmenities{})
-
-		// // ROOM VIEWS TABLE
-		// db.AutoMigrate(&models.RoomViews{})
-
-		// // PROPERTY TYPE TABLE
-		// db.AutoMigrate(&models.PropertyType{})
-
-		// // FIELDS TABLE
-		// db.AutoMigrate(&models.Fields{})
-
-		// // BUSINESS TABLE
-		// db.AutoMigrate(&models.Businesses{})
-
-		// // ADDRESS TABLE
-		// db.AutoMigrate(&models.Address{})
-
-		// // BRANDS TABLE
-		// db.AutoMigrate(&models.Brands{})
-
-		// // PROPERTIES TABLE
-		// db.AutoMigrate(&models.Properties{})
-
-		// // PHOTOS TABLE
-		// db.AutoMigrate(&models.Media{})
-
-		// // CONTACT PERSON TABLE
-		// db.AutoMigrate(&models.ContactPerson{})
-
-		// // // ACCOUNTS TABLE
-		// // db.AutoMigrate(&models.Accounts{})
-
-		// // DOCUMENTS FOR ENLISTING TABLE
-		// db.AutoMigrate(&models.DocumentsForEnlisting{})
-
-		// // // WORKING HOURS TABLE
-		// // db.AutoMigrate(&models.WorkingHours{})
-
-		// // // HOLIDAYS TABLE
-		// // db.AutoMigrate(&models.Holidays{})
-
-		// // // LEAVE TYPES TABLE
-		// // db.AutoMigrate(&models.LeaveTypes{})
-
-		// // REASONS TABLE
-		// db.AutoMigrate(&models.Reasons{})
-
-		// // BUSINEES META DATA TABLE
-		// db.AutoMigrate(&models.BusinessMetaData{})
+		// STATUS LOGS TABLE
+		db.AutoMigrate(&models.StatusLogs{})
 
 	}
 
 	DB = db
 	SQLDB = sqlDB
 
+}
+
+// createEnumTypes creates the necessary enum types in PostgreSQL
+func createEnumTypes(db *gorm.DB) {
+	// Create CampaignStatus enum
+	db.Exec(`DO $$ BEGIN
+		CREATE TYPE campaign_status AS ENUM ('draft', 'active', 'completed', 'cancelled', 'full');
+	EXCEPTION
+		WHEN duplicate_object THEN null;
+	END $$;`)
+
+	// Create ParticipantStatus enum
+	db.Exec(`DO $$ BEGIN
+		CREATE TYPE participant_status AS ENUM ('pending', 'active', 'left', 'rejected');
+	EXCEPTION
+		WHEN duplicate_object THEN null;
+	END $$;`)
+
+	// Create Status enum
+	db.Exec(`DO $$ BEGIN
+		CREATE TYPE status_type AS ENUM ('Active', 'Suspended', 'Deleted', 'Inactive', 'Pending Approval', 'Rejected', 'Approved', 'Submitted');
+	EXCEPTION
+		WHEN duplicate_object THEN null;
+	END $$;`)
+
+	log.Println("Enum types created successfully")
 }

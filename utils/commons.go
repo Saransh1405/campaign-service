@@ -10,9 +10,9 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
-	"users-service/constants"
+	"campaign-service/constants"
 
-	genericModel "users-service/models"
+	genericModel "campaign-service/models"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap/zapcore"
@@ -176,7 +176,10 @@ func ErrorBasedOnResponse(ctx *gin.Context, msg string, respType int, err error)
 		SendInternalServerError(ctx, msg, constants.WLInternalServerErrorCode, respType, err)
 
 	//400
-	case errors.New(constants.BadRequestMessage).Error(), errors.New(constants.PasswordDoesNotMatchMessage).Error(), errors.New(constants.OldPasswordAndNewPasswordSameMessage).Error(), errors.New(constants.BusinessIdIsRequiredMessage).Error(), errors.New(constants.BrandIdIsRequiredMessage).Error():
+	case errors.New(constants.BadRequestMessage).Error(), errors.New(constants.PasswordDoesNotMatchMessage).Error(),
+		errors.New(constants.OldPasswordAndNewPasswordSameMessage).Error(), errors.New(constants.BusinessIdIsRequiredMessage).Error(), errors.New(constants.BrandIdIsRequiredMessage).Error(),
+		errors.New(constants.InvalidStartDateMessage).Error(), errors.New(constants.InvalidEndDateMessage).Error(), errors.New(constants.EndDateBeforeStartDateMessage).Error(),
+		errors.New(constants.MaxParticipantsLessThanMinParticipants).Error(), errors.New(constants.PriceMustBeGreaterThanZero).Error():
 		SendBadRequest(ctx, msg, constants.WLBadRequestCode, respType, err)
 
 	//401
@@ -188,11 +191,12 @@ func ErrorBasedOnResponse(ctx *gin.Context, msg string, respType int, err error)
 		SendAccountDisable(ctx, msg, constants.WLForbiddenCode, respType, err)
 
 	//404
-	case errors.New(constants.NotFoundMessage).Error(), errors.New(constants.AccountsDataNotFoundMessage).Error(), errors.New(constants.RoleNotFoundMessage).Error(), errors.New(constants.UserNotFoundMessage).Error(), errors.New(constants.CurrencyNotFoundMessage).Error(), errors.New(constants.SupportedLanguageNotFoundMessage).Error(), errors.New(constants.StateTaxNotFoundMessage).Error(), errors.New(constants.AccountTypeNotFoundMessage).Error():
+	case errors.New(constants.NotFoundMessage).Error(),
+		errors.New(constants.AccountsDataNotFoundMessage).Error(), errors.New(constants.RoleNotFoundMessage).Error(), errors.New(constants.UserNotFoundMessage).Error(), errors.New(constants.CurrencyNotFoundMessage).Error(), errors.New(constants.SupportedLanguageNotFoundMessage).Error(), errors.New(constants.StateTaxNotFoundMessage).Error(), errors.New(constants.AccountTypeNotFoundMessage).Error(), errors.New(constants.CampaignNotFoundMessage).Error():
 		SendNoDataFoundError(ctx, msg, constants.WLNoDataFoundCode, respType, err)
 
 	//409
-	case errors.New(constants.ConflictMessage).Error(), errors.New(constants.UserAlreadyExistsMessage).Error():
+	case errors.New(constants.ConflictMessage).Error(), errors.New(constants.UserAlreadyExistsMessage).Error(), errors.New(constants.CampaignNameAlreadyExistsMessage).Error():
 		SendConflict(ctx, constants.WLDataConflictCode, msg, respType, nil)
 
 	//429

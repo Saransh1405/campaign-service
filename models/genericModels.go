@@ -101,12 +101,13 @@ type TokenResponse struct {
 } //@name TokenResponse
 
 type StatusLogs struct {
-	Status           Status    `gorm:"column:status;type:status" json:"status" example:"active"`            // active, inactive , suspended, deleted
-	ActionByUserRole string    `gorm:"column:action_by_user_role" json:"actionByUserRole" example:"admin"`  // admin, user
-	ActionByUserId   string    `gorm:"column:action_by_user_id" json:"actionByUserId" example:"1"`          // 1, 2
-	Notes            string    `gorm:"column:notes" json:"note" example:"xyz"`                              // xyz
-	Timestamp        time.Time `gorm:"column:timestamp" json:"timestamp" example:"2020-09-01T00:00:00Z"`    // 2020-09-01T00:00:00Z
-	EntityId         uuid.UUID `gorm:"column:entity_id" json:"entityId" example:"5f5f5f5f5f5f5f5f5f5f5f5f"` // 5f5f5f5f5f5f5f5f5f5f5f5f
+	ID               uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id" example:"a577055d-f40a-4617-9dc4-a6a81b317c8b"`
+	Status           Status    `gorm:"column:status;type:status_type" json:"status" example:"active"`
+	CampaignID       uuid.UUID `gorm:"column:campaign_id" json:"campaignId" example:"5f5f5f5f5f5f5f5f5f5f5f5f"` // 5f5f5f5f5f5f5f5f5f5f5f5f
+	ActionByUserRole string    `gorm:"column:action_by_user_role" json:"actionByUserRole" example:"admin"`      // admin, user
+	ActionByUserId   string    `gorm:"column:action_by_user_id" json:"actionByUserId" example:"1"`              // 1, 2
+	Notes            string    `gorm:"column:notes" json:"note" example:"xyz"`                                  // xyz
+	Timestamp        int64     `gorm:"column:timestamp" json:"timestamp"`                                       // 2020-09-01T00:00:00Z
 } //@name StatusLogs
 
 type Logs struct {

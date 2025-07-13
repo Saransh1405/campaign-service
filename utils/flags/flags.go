@@ -1,7 +1,7 @@
 package flags
 
 import (
-	"users-service/constants"
+	"campaign-service/constants"
 
 	flag "github.com/spf13/pflag"
 )

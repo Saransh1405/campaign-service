@@ -1,12 +1,12 @@
 package novu
 
 import (
+	"campaign-service/constants"
+	"campaign-service/utils/configs"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
-	"users-service/constants"
-	"users-service/utils/configs"
 
 	novu "github.com/lonesta/go-novu/lib"
 )

@@ -1,15 +1,16 @@
 package api
 
 import (
+	"campaign-service/api/campaign"
+	"campaign-service/constants"
+	"campaign-service/utils"
+	"campaign-service/utils/localization"
+	"campaign-service/utils/middleware"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
-	"users-service/constants"
-	"users-service/utils"
-	"users-service/utils/localization"
-	"users-service/utils/middleware"
 
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
@@ -46,6 +47,12 @@ func GetRouter(localizationMiddleware gin.HandlerFunc, loggerMiddleware gin.Hand
 	v1Routes := router.Group("v1")
 	{
 		v1Routes.Use(middleware.KecyalokMiddleware())
+
+		// Handle the POST requests at /v1/campaign
+		v1Routes.POST(constants.Campaign, campaign.CreateCampaign)
+
+		// Handle the PATCH requests at /v1/campaign
+		v1Routes.PATCH(constants.Campaign, campaign.UpdateCampaign)
 
 		// // Handle the POST requests at /v1/role
 		// v1Routes.POST(constants.Role, role.Post)

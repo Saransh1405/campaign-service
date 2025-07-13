@@ -20,7 +20,7 @@ kafka:
   password: ""
 
 redis:
-  url: "localhost:6379"
+  url: "redis://localhost:6379"
   username: ""
   password: ""
   ratePerMinute: 2

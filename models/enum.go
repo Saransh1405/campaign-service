@@ -13,23 +13,31 @@ const (
 	Submitted       Status = "Submitted"
 )
 
-type CampaignStatus int
+type CampaignStatus string
 
 // Campaign status constants
 const (
-	CampaignStatusDraft     = 0
-	CampaignStatusActive    = 1
-	CampaignStatusCompleted = 2
-	CampaignStatusCancelled = 3
-	CampaignStatusFull      = 4
+	CampaignStatusDraft     CampaignStatus = "draft"
+	CampaignStatusActive    CampaignStatus = "active"
+	CampaignStatusCompleted CampaignStatus = "completed"
+	CampaignStatusCancelled CampaignStatus = "cancelled"
+	CampaignStatusFull      CampaignStatus = "full"
 )
 
-type ParticipantStatus int
+type ParticipantStatus string
 
 // Participant status constants
 const (
-	ParticipantStatusPending  = 0
-	ParticipantStatusActive   = 1
-	ParticipantStatusLeft     = 2
-	ParticipantStatusRejected = 3
+	ParticipantStatusPending  ParticipantStatus = "pending"
+	ParticipantStatusActive   ParticipantStatus = "active"
+	ParticipantStatusLeft     ParticipantStatus = "left"
+	ParticipantStatusRejected ParticipantStatus = "rejected"
+)
+
+type CampaignEventType string
+
+const (
+	CreateCampaignEvent CampaignEventType = "create_campaign"
+	UpdateCampaignEvent CampaignEventType = "update_campaign"
+	DeleteCampaignEvent CampaignEventType = "delete_campaign"
 )

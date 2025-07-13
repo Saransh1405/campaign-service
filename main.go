@@ -1,26 +1,25 @@
 package main
 
 import (
+	"campaign-service/api"
+	"campaign-service/constants"
+	"campaign-service/library/kafka"
+	"campaign-service/library/postgres"
+	"campaign-service/library/redis_provider"
+	"campaign-service/logger"
+	"campaign-service/utils"
 	"context"
 	"fmt"
-	"users-service/api"
-	"users-service/constants"
-	"users-service/library/kafka"
-	"users-service/library/postgres"
-	"users-service/library/redis_provider"
-	"users-service/logger"
-	"users-service/utils"
-
-	"users-service/utils/configs"
-	"users-service/utils/localization"
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 
+	"campaign-service/utils/configs"
+	"campaign-service/utils/flags"
+	"campaign-service/utils/httpclient"
+	"campaign-service/utils/localization"
+	loggerMiddleware "campaign-service/utils/logger"
 	"time"
-	"users-service/utils/flags"
-	"users-service/utils/httpclient"
-	loggerMiddleware "users-service/utils/logger"
 
 	// grpcLib "users-service/util/grpc"
 

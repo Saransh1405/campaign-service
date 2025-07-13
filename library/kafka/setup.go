@@ -1,13 +1,13 @@
 package kafka
 
 import (
+	"campaign-service/constants"
+	"campaign-service/utils/configs"
 	"log"
-	"users-service/constants"
-	"users-service/utils/configs"
 )
 
 // kafka command
-// kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 --topic create_campaign
+// kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 --topic update_campaign
 
 func NewConnection() {
 	// get application configs

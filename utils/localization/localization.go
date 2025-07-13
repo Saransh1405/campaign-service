@@ -1,12 +1,12 @@
 package localization
 
 import (
+	"campaign-service/constants"
+	"campaign-service/logger"
+	"campaign-service/utils/configs"
 	"context"
 	"encoding/json"
 	"fmt"
-	"users-service/constants"
-	"users-service/logger"
-	"users-service/utils/configs"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
