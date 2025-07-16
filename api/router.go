@@ -54,6 +54,9 @@ func GetRouter(localizationMiddleware gin.HandlerFunc, loggerMiddleware gin.Hand
 		// Handle the PATCH requests at /v1/campaign
 		v1Routes.PATCH(constants.Campaign, campaign.UpdateCampaign)
 
+		// Handle the GET requests at /v1/campaign
+		v1Routes.GET(constants.Campaign, campaign.GetCampaign)
+
 		// // Handle the POST requests at /v1/role
 		// v1Routes.POST(constants.Role, role.Post)
 

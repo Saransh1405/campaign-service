@@ -3,10 +3,13 @@ package helperfunctions
 import (
 	"campaign-service/constants"
 	"campaign-service/library/postgres"
+	"campaign-service/library/redis_provider"
 	"campaign-service/logger"
 	"campaign-service/models"
 	"campaign-service/utils"
 	"campaign-service/utils/localization"
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -177,4 +180,73 @@ func AddLogs(trigger, enitity, enitityId, clientName, actionById string, oldData
 		fmt.Printf("insert.Error: %v\n", insert.Error)
 	}
 
+}
+
+func InvalidateAllCampaignUserCache(ctx *context.Context, userID string) error {
+	redis := redis_provider.Client
+
+	indexKey := fmt.Sprintf("campaign:user:%s:index", userID)
+	campaignIDs, err := redis.SMembers(*ctx, indexKey).Result()
+	if err != nil {
+		return fmt.Errorf("failed to get campaign IDs from redis set: %w", err)
+	}
+
+	var campaignKeys []string
+	for _, id := range campaignIDs {
+		campaignKeys = append(campaignKeys, fmt.Sprintf("campaign:user:%s:%s", userID, id))
+	}
+
+	if len(campaignKeys) > 0 {
+		if err := redis.Del(*ctx, campaignKeys...).Err(); err != nil {
+			return fmt.Errorf("failed to delete campaign keys: %w", err)
+		}
+	}
+
+	if err := redis.Del(*ctx, indexKey).Err(); err != nil {
+		return fmt.Errorf("failed to delete index key: %w", err)
+	}
+
+	return nil
+}
+
+func GetActiveCampaignsFromRedis(ctx *context.Context) ([]models.Campaign, error) {
+	redis := redis_provider.Client
+
+	cachePattern := "campaign:user:*"
+	keys, err := redis.Keys(*ctx, cachePattern).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	var campaigns []models.Campaign
+	for _, key := range keys {
+		val, err := redis.Get(*ctx, key).Result()
+		if err == nil && val != "" {
+			var campaign models.Campaign
+			if err := json.Unmarshal([]byte(val), &campaign); err == nil {
+				campaigns = append(campaigns, campaign)
+			}
+		}
+	}
+	return campaigns, nil
+}
+
+func AddCampaignToUserIndex(ctx *context.Context, userID, campaignID string) error {
+	redis := redis_provider.Client
+	indexKey := fmt.Sprintf("campaign:user:%s:index", userID)
+	return redis.SAdd(*ctx, indexKey, campaignID).Err()
+}
+
+func GetCampaignFromRedis(ctx *context.Context, userID, campaignID string) (*models.Campaign, error) {
+	redis := redis_provider.Client
+	cacheKey := fmt.Sprintf("campaign:user:%s:%s", userID, campaignID)
+	val, err := redis.Get(*ctx, cacheKey).Result()
+	if err != nil {
+		return nil, err
+	}
+	var campaign models.Campaign
+	if err := json.Unmarshal([]byte(val), &campaign); err != nil {
+		return nil, err
+	}
+	return &campaign, nil
 }

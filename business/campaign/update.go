@@ -4,8 +4,11 @@ import (
 	"campaign-service/constants"
 	"campaign-service/library/kafka/campaign"
 	"campaign-service/library/postgres"
+	"campaign-service/library/redis_provider"
 	"campaign-service/logger"
 	"campaign-service/models"
+	"campaign-service/utils/helperfunctions"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -122,14 +125,26 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 
 		// get the campaign from the database
 		if campaign.ID != nil {
-			db := postgres.DB
 			var existingCampaign models.Campaign
 
-			campaignModel := db.Model(&models.Campaign{}).Where("id = ?", *campaign.ID).First(&existingCampaign)
-			if campaignModel.Error != nil {
-				log.With(zap.Error(errors.New(constants.CampaignNotFoundMessage))).Error(constants.CampaignNotFoundMessage)
-				camapignGetErrCh <- errors.New(constants.CampaignNotFoundMessage)
+			redis := redis_provider.Client
+			campaignKey := fmt.Sprintf("campaign:user:%s:%s", userID, *campaign.ID)
+			campaignData, err := redis.Get(ctx, campaignKey).Result()
+			if err == nil && campaignData != "" {
+				// Unmarshal the JSON into the struct
+				if err := json.Unmarshal([]byte(campaignData), &existingCampaign); err != nil {
+					log.With(zap.Error(err)).Error("Failed to unmarshal campaign from redis")
+				}
+			} else {
+				// Not found in Redis, get from DB
+				db := postgres.DB
+				campaignModel := db.Model(&models.Campaign{}).Where("id = ?", *campaign.ID).First(&existingCampaign)
+				if campaignModel.Error != nil {
+					log.With(zap.Error(errors.New(constants.CampaignNotFoundMessage))).Error(constants.CampaignNotFoundMessage)
+					camapignGetErrCh <- errors.New(constants.CampaignNotFoundMessage)
+				}
 			}
+
 			campaignModelCh <- &existingCampaign
 		}
 	}()
@@ -230,6 +245,15 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 	go func() {
 		if err := PublishUpdateDataToKafka(*newCampaign, updateFields, string(models.UpdateCampaignEvent)); err != nil {
 			log.With(zap.Error(err)).Error("Failed to publish campaign event to kafka")
+		}
+	}()
+
+	go func() {
+		backgroundContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := helperfunctions.InvalidateAllCampaignUserCache(&backgroundContext, userID); err != nil {
+			log.With(zap.Error(err)).Error("Failed to invalidate campaign user cache")
 		}
 	}()
 

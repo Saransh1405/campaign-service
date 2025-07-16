@@ -33,6 +33,7 @@
         "MaxParticipantsLessThanMinParticipants": "Max participants cannot be less than min participants.",
         "PriceMustBeGreaterThanZero": "Price must be greater than zero.",
         "CampaignNameAlreadyExists": "Campaign name already exists.",
-        "CampaignNotFound": "Campaign not found."
+        "CampaignNotFound": "Campaign not found.",
+        "FailedToFetchCampaigns": "Failed to fetch campaigns."
     }
 }

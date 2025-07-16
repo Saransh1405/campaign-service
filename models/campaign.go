@@ -140,6 +140,23 @@ type UpdateCampaignRequest struct {
 	Status          *CampaignStatus `json:"status,omitempty"`
 }
 
+type GetCampaignRequest struct {
+	GetRequest
+	ID        string   `form:"id"`
+	Status    string   `form:"status"`
+	UserID    string   `form:"user_id"`
+	City      string   `form:"city"`
+	State     string   `form:"state"`
+	Country   string   `form:"country"`
+	MinPrice  int64    `form:"min_price"`
+	MaxPrice  int64    `form:"max_price"`
+	StartDate string   `form:"start_date"` // YYYY-MM-DD
+	EndDate   string   `form:"end_date"`   // YYYY-MM-DD
+	Tags      []string `form:"tags"`
+	SortBy    string   `form:"sort_by"`    // start_date, created_at, price, participants
+	SortOrder string   `form:"sort_order"` // asc, desc
+}
+
 type CampaignEvent struct {
 	Campaign         map[string]interface{} `json:"campaign"`
 	UpdateFields     map[string]interface{} `json:"update_fields"`

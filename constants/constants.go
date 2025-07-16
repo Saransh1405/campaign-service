@@ -38,6 +38,7 @@ const (
 	BindingFailedErrr             = "Binding fail"
 	UnauthorizedErrr              = "Unauthorized"
 	NotFoundErrr                  = "Not Found"
+	NoContentErrr                 = "No Content"
 	VaultInitializationFailedErrr = "Vault initialization failed"
 	LanguageString                = "language"
 	LogoutSuccessMessage          = "Logout successfully"

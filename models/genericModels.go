@@ -17,6 +17,7 @@ type APIResponse struct {
 	Status    string      `json:"status" example:"success"`
 	Message   string      `json:"message,omitempty" example:"success"`
 	ErrorCode string      `json:"errorCode,omitempty" example:"0"`
+	Total     int64       `json:"total,omitempty" example:"10"`
 	Data      interface{} `json:"data,omitempty"`
 } //@name APIResponse
 
@@ -46,8 +47,8 @@ type DeleteRequest struct {
 } //@name DeleteRequest
 
 type GetRequest struct {
-	Skip  int `json:"skip" example:"0"`   // records to skip
-	Limit int `json:"limit" example:"10"` // limit for the records. non of records to fetch per page
+	Skip  int `json:"skip" example:"0" form:"skip"`    // records to skip
+	Limit int `json:"limit" example:"10" form:"limit"` // limit for the records. non of records to fetch per page
 } //@name GetRequest
 
 type Stamps struct {

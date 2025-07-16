@@ -73,7 +73,7 @@ func ConnectDatabase(ctx context.Context, postgresConfig models.PostgresConfig) 
 func createEnumTypes(db *gorm.DB) {
 	// Create CampaignStatus enum
 	db.Exec(`DO $$ BEGIN
-		CREATE TYPE campaign_status AS ENUM ('draft', 'active', 'completed', 'cancelled', 'full');
+		CREATE TYPE campaign_status AS ENUM ('draft', 'active', 'completed', 'inactive', 'cancelled', 'full');
 	EXCEPTION
 		WHEN duplicate_object THEN null;
 	END $$;`)

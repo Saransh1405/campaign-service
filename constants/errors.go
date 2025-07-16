@@ -94,6 +94,7 @@ const (
 	PriceMustBeGreaterThanZero             = "errors.PriceMustBeGreaterThanZero"
 	CampaignNameAlreadyExistsMessage       = "errors.CampaignNameAlreadyExists"
 	CampaignNotFoundMessage                = "errors.CampaignNotFound"
+	FailedToFetchCampaignsMessage          = "errors.FailedToFetchCampaigns"
 )
 
 // Trigger Messages

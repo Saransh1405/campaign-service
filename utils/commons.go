@@ -105,6 +105,16 @@ func SendNoDataFoundError(ctx *gin.Context, msg, code string, respType int, err 
 	})
 }
 
+func SendNoContentError(ctx *gin.Context, msg, code string, respType int, err error) {
+	data := getData(respType, nil)
+	ctx.JSON(http.StatusNoContent, genericModel.APIResponse{
+		Status:    constants.APIRespErrorKey,
+		Message:   msg,
+		ErrorCode: code,
+		Data:      data,
+	})
+}
+
 func SendAccountDisable(ctx *gin.Context, msg, code string, respType int, err error) {
 	ctx.JSON(http.StatusForbidden, genericModel.APIResponse{
 		Status:    constants.APIRespErrorKey,
@@ -129,6 +139,15 @@ func SendStatusOK(ctx *gin.Context, respType int, msg string, data interface{}) 
 		Status:  constants.APIRespSuccessKey,
 		Message: msg,
 		Data:    getData(respType, data),
+	})
+}
+
+func SendStatusWithData(ctx *gin.Context, respType int, msg string, data interface{}, total int64) {
+	ctx.JSON(http.StatusOK, genericModel.APIResponse{
+		Status:  constants.APIRespSuccessKey,
+		Message: msg,
+		Data:    getData(respType, data),
+		Total:   total,
 	})
 }
 
@@ -179,7 +198,9 @@ func ErrorBasedOnResponse(ctx *gin.Context, msg string, respType int, err error)
 	case errors.New(constants.BadRequestMessage).Error(), errors.New(constants.PasswordDoesNotMatchMessage).Error(),
 		errors.New(constants.OldPasswordAndNewPasswordSameMessage).Error(), errors.New(constants.BusinessIdIsRequiredMessage).Error(), errors.New(constants.BrandIdIsRequiredMessage).Error(),
 		errors.New(constants.InvalidStartDateMessage).Error(), errors.New(constants.InvalidEndDateMessage).Error(), errors.New(constants.EndDateBeforeStartDateMessage).Error(),
-		errors.New(constants.MaxParticipantsLessThanMinParticipants).Error(), errors.New(constants.PriceMustBeGreaterThanZero).Error():
+		errors.New(constants.MaxParticipantsLessThanMinParticipants).Error(),
+		errors.New(constants.PriceMustBeGreaterThanZero).Error(),
+		errors.New(constants.FailedToFetchCampaignsMessage).Error():
 		SendBadRequest(ctx, msg, constants.WLBadRequestCode, respType, err)
 
 	//401
