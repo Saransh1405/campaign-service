@@ -1,8 +1,8 @@
 package logger
 
 import (
+	"campaign-service/constants"
 	"context"
-	"users-service/constants"
 
 	"go.uber.org/zap"
 )

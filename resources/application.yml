@@ -11,8 +11,19 @@ swagger :
   host: "http://13.127.47.0:8001/swagger/index.html"
 
 server :
-  host: "http://localhost:8001"
-  port: 8001
+  host: "http://localhost:8002"
+  port: 8002
+
+kafka:
+  host: "localhost:9092"
+  username: ""
+  password: ""
+
+redis:
+  url: "redis://localhost:6379"
+  username: ""
+  password: ""
+  ratePerMinute: 2
 
 keycloak: 
   resources: ["accounts", "business", "brands", "properties"]

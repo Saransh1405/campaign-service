@@ -1,8 +1,8 @@
 package logger
 
 import (
+	"campaign-service/utils"
 	"os"
-	"users-service/utils"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"

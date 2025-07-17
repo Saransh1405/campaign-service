@@ -1,8 +1,8 @@
 package logger
 
 import (
-	"users-service/constants"
-	"users-service/utils/configs"
+	"campaign-service/constants"
+	"campaign-service/utils/configs"
 )
 
 func InitLogger() {

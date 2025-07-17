@@ -1,10 +1,10 @@
 package middleware
 
 import (
+	"campaign-service/constants"
+	"campaign-service/models"
 	"encoding/json"
 	"net/http"
-	"users-service/constants"
-	"users-service/models"
 
 	"github.com/gin-gonic/gin"
 )

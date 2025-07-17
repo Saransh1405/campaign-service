@@ -1,13 +1,13 @@
 package mongoDb
 
 import (
+	"campaign-service/constants"
+	"campaign-service/logger"
+	"campaign-service/utils/configs"
 	"context"
 	"errors"
 	"fmt"
 	"time"
-	"users-service/constants"
-	"users-service/logger"
-	"users-service/utils/configs"
 
 	"go.mongodb.org/mongo-driver/bson"
 

@@ -33,6 +33,12 @@ const (
 	ServerPort                           = "server.port"
 	MongoUrlKey                          = "url"
 	MongoDatabaseKey                     = "database"
+	KafkaHostConfigKey                   = "kafka.host"
+	KafkaUsernameConfigKey               = "kafka.username"
+	KafkaPasswordConfigKey               = "kafka.password"
+	RedisHostConfigKey                   = "redis.host"
+	RedisPortConfigKey                   = "redis.port"
+	RedisPasswordConfigKey               = "redis.password"
 )
 
 // language Config

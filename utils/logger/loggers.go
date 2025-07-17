@@ -1,9 +1,9 @@
 package logger
 
 import (
+	"campaign-service/constants"
+	"campaign-service/logger"
 	"time"
-	"users-service/constants"
-	"users-service/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
