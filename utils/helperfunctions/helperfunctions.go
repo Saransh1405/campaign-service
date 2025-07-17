@@ -182,71 +182,284 @@ func AddLogs(trigger, enitity, enitityId, clientName, actionById string, oldData
 
 }
 
-func InvalidateAllCampaignUserCache(ctx *context.Context, userID string) error {
+// InvalidateAllCampaignUserCache invalidates all campaign-related cache for a specific user
+func InvalidateAllCampaignUserCache(ctx context.Context, userID string) error {
+	log := logger.GetLoggerWithoutContext()
 	redis := redis_provider.Client
 
+	// Delete individual campaign keys
 	indexKey := fmt.Sprintf("campaign:user:%s:index", userID)
-	campaignIDs, err := redis.SMembers(*ctx, indexKey).Result()
-	if err != nil {
+	campaignIDs, err := redis.SMembers(ctx, indexKey).Result()
+	if err != nil && err.Error() != "redis: nil" {
+		log.Error("Failed to get campaign IDs from redis set", zap.Error(err))
 		return fmt.Errorf("failed to get campaign IDs from redis set: %w", err)
 	}
 
+	// Delete individual campaign keys
 	var campaignKeys []string
 	for _, id := range campaignIDs {
 		campaignKeys = append(campaignKeys, fmt.Sprintf("campaign:user:%s:%s", userID, id))
 	}
 
 	if len(campaignKeys) > 0 {
-		if err := redis.Del(*ctx, campaignKeys...).Err(); err != nil {
+		if err := redis.Del(ctx, campaignKeys...).Err(); err != nil {
+			log.Error("Failed to delete campaign keys", zap.Error(err))
 			return fmt.Errorf("failed to delete campaign keys: %w", err)
 		}
 	}
 
-	if err := redis.Del(*ctx, indexKey).Err(); err != nil {
+	// Delete the index key
+	if err := redis.Del(ctx, indexKey).Err(); err != nil {
+		log.Error("Failed to delete index key", zap.Error(err))
 		return fmt.Errorf("failed to delete index key: %w", err)
+	}
+
+	// Delete all query cache keys for this user
+	queryPattern := fmt.Sprintf("campaign:user:%s:*", userID)
+	queryCacheKeys, err := redis.Keys(ctx, queryPattern).Result()
+	if err != nil {
+		log.Error("Failed to get query cache keys", zap.Error(err))
+		return fmt.Errorf("failed to get query cache keys: %w", err)
+	}
+
+	// Filter out individual campaign keys and index key (already deleted)
+	var filteredQueryKeys []string
+	for _, key := range queryCacheKeys {
+		// Skip individual campaign keys (they have UUID format at the end)
+		// Skip index key (already deleted)
+		if !strings.Contains(key, ":index") && !isIndividualCampaignKey(key) {
+			filteredQueryKeys = append(filteredQueryKeys, key)
+		}
+	}
+
+	if len(filteredQueryKeys) > 0 {
+		if err := redis.Del(ctx, filteredQueryKeys...).Err(); err != nil {
+			log.Error("Failed to delete query cache keys", zap.Error(err))
+			return fmt.Errorf("failed to delete query cache keys: %w", err)
+		}
+	}
+
+	log.Info("Successfully invalidated all campaign cache for user", zap.String("userID", userID))
+	return nil
+}
+
+// isIndividualCampaignKey checks if a key is an individual campaign key
+func isIndividualCampaignKey(key string) bool {
+	parts := strings.Split(key, ":")
+	if len(parts) < 4 {
+		return false
+	}
+	// Individual campaign keys have format: campaign:user:userID:campaignID
+	// campaignID is typically a UUID, so we check if the last part looks like a UUID
+	lastPart := parts[len(parts)-1]
+	return len(lastPart) == 36 && strings.Count(lastPart, "-") == 4
+}
+
+// GetActiveCampaignsFromRedis gets all active campaigns from Redis
+// Note: This function should be used carefully as it can be expensive for large datasets
+func GetActiveCampaignsFromRedis(ctx context.Context) ([]models.Campaign, error) {
+	log := logger.GetLoggerWithoutContext()
+	redis := redis_provider.Client
+
+	// Use a more specific pattern to avoid getting query cache keys
+	cachePattern := "campaign:user:*:*"
+	keys, err := redis.Keys(ctx, cachePattern).Result()
+	if err != nil {
+		log.Error("Failed to get campaign keys from redis", zap.Error(err))
+		return nil, fmt.Errorf("failed to get campaign keys from redis: %w", err)
+	}
+
+	var campaigns []models.Campaign
+	var validKeys []string
+
+	// Filter to only individual campaign keys
+	for _, key := range keys {
+		if isIndividualCampaignKey(key) && !strings.Contains(key, ":index") {
+			validKeys = append(validKeys, key)
+		}
+	}
+
+	// Process keys in batches to avoid memory issues
+	batchSize := 100
+	for i := 0; i < len(validKeys); i += batchSize {
+		end := i + batchSize
+		if end > len(validKeys) {
+			end = len(validKeys)
+		}
+
+		batch := validKeys[i:end]
+		results, err := redis.MGet(ctx, batch...).Result()
+		if err != nil {
+			log.Error("Failed to get campaign batch from redis", zap.Error(err))
+			continue
+		}
+
+		for _, result := range results {
+			if result == nil {
+				continue
+			}
+			var campaign models.Campaign
+			if err := json.Unmarshal([]byte(result.(string)), &campaign); err == nil {
+				campaigns = append(campaigns, campaign)
+			}
+		}
+	}
+
+	log.Info("Retrieved campaigns from redis", zap.Int("count", len(campaigns)))
+	return campaigns, nil
+}
+
+// AddCampaignToUserIndex adds a campaign ID to the user's campaign index set
+func AddCampaignToUserIndex(ctx context.Context, userID, campaignID string) error {
+	log := logger.GetLoggerWithoutContext()
+	redis := redis_provider.Client
+
+	indexKey := fmt.Sprintf("campaign:user:%s:index", userID)
+
+	// Add to set
+	if err := redis.SAdd(ctx, indexKey, campaignID).Err(); err != nil {
+		log.Error("Failed to add campaign to user index",
+			zap.String("userID", userID),
+			zap.String("campaignID", campaignID),
+			zap.Error(err))
+		return fmt.Errorf("failed to add campaign to user index: %w", err)
+	}
+
+	// Set TTL for the index set
+	if err := redis.Expire(ctx, indexKey, 30*time.Minute).Err(); err != nil {
+		log.Error("Failed to set TTL for user index set",
+			zap.String("userID", userID),
+			zap.Error(err))
+		return fmt.Errorf("failed to set TTL for user index set: %w", err)
 	}
 
 	return nil
 }
 
-func GetActiveCampaignsFromRedis(ctx *context.Context) ([]models.Campaign, error) {
+// GetCampaignFromRedis retrieves a specific campaign from Redis
+func GetCampaignFromRedis(ctx context.Context, userID, campaignID string) (*models.Campaign, error) {
+	log := logger.GetLoggerWithoutContext()
 	redis := redis_provider.Client
 
-	cachePattern := "campaign:user:*"
-	keys, err := redis.Keys(*ctx, cachePattern).Result()
-	if err != nil {
-		return nil, err
-	}
-
-	var campaigns []models.Campaign
-	for _, key := range keys {
-		val, err := redis.Get(*ctx, key).Result()
-		if err == nil && val != "" {
-			var campaign models.Campaign
-			if err := json.Unmarshal([]byte(val), &campaign); err == nil {
-				campaigns = append(campaigns, campaign)
-			}
-		}
-	}
-	return campaigns, nil
-}
-
-func AddCampaignToUserIndex(ctx *context.Context, userID, campaignID string) error {
-	redis := redis_provider.Client
-	indexKey := fmt.Sprintf("campaign:user:%s:index", userID)
-	return redis.SAdd(*ctx, indexKey, campaignID).Err()
-}
-
-func GetCampaignFromRedis(ctx *context.Context, userID, campaignID string) (*models.Campaign, error) {
-	redis := redis_provider.Client
 	cacheKey := fmt.Sprintf("campaign:user:%s:%s", userID, campaignID)
-	val, err := redis.Get(*ctx, cacheKey).Result()
+	val, err := redis.Get(ctx, cacheKey).Result()
 	if err != nil {
-		return nil, err
+		if err.Error() == "redis: nil" {
+			return nil, fmt.Errorf("campaign not found in cache")
+		}
+		log.Error("Failed to get campaign from redis",
+			zap.String("userID", userID),
+			zap.String("campaignID", campaignID),
+			zap.Error(err))
+		return nil, fmt.Errorf("failed to get campaign from redis: %w", err)
 	}
+
 	var campaign models.Campaign
 	if err := json.Unmarshal([]byte(val), &campaign); err != nil {
-		return nil, err
+		log.Error("Failed to unmarshal campaign from redis",
+			zap.String("userID", userID),
+			zap.String("campaignID", campaignID),
+			zap.Error(err))
+		return nil, fmt.Errorf("failed to unmarshal campaign: %w", err)
 	}
+
 	return &campaign, nil
+}
+
+// SetCampaignInRedis caches a campaign in Redis
+func SetCampaignInRedis(ctx context.Context, userID string, campaign *models.Campaign) error {
+	log := logger.GetLoggerWithoutContext()
+	redis := redis_provider.Client
+
+	cacheKey := fmt.Sprintf("campaign:user:%s:%s", userID, campaign.ID.String())
+
+	campaignJSON, err := json.Marshal(campaign)
+	if err != nil {
+		log.Error("Failed to marshal campaign for caching",
+			zap.String("userID", userID),
+			zap.String("campaignID", campaign.ID.String()),
+			zap.Error(err))
+		return fmt.Errorf("failed to marshal campaign: %w", err)
+	}
+
+	// Set individual campaign with 30-minute TTL
+	if err := redis.Set(ctx, cacheKey, campaignJSON, 30*time.Minute).Err(); err != nil {
+		log.Error("Failed to set campaign in redis",
+			zap.String("userID", userID),
+			zap.String("campaignID", campaign.ID.String()),
+			zap.Error(err))
+		return fmt.Errorf("failed to set campaign in redis: %w", err)
+	}
+
+	// Add to user's campaign index
+	if err := AddCampaignToUserIndex(ctx, userID, campaign.ID.String()); err != nil {
+		log.Error("Failed to add campaign to user index",
+			zap.String("userID", userID),
+			zap.String("campaignID", campaign.ID.String()),
+			zap.Error(err))
+		// Don't return error here as the main caching succeeded
+	}
+
+	return nil
+}
+
+// RemoveCampaignFromRedis removes a specific campaign from Redis
+func RemoveCampaignFromRedis(ctx context.Context, userID, campaignID string) error {
+	log := logger.GetLoggerWithoutContext()
+	redis := redis_provider.Client
+
+	cacheKey := fmt.Sprintf("campaign:user:%s:%s", userID, campaignID)
+	indexKey := fmt.Sprintf("campaign:user:%s:index", userID)
+
+	// Remove individual campaign
+	if err := redis.Del(ctx, cacheKey).Err(); err != nil {
+		log.Error("Failed to delete campaign from redis",
+			zap.String("userID", userID),
+			zap.String("campaignID", campaignID),
+			zap.Error(err))
+		return fmt.Errorf("failed to delete campaign from redis: %w", err)
+	}
+
+	// Remove from user's campaign index
+	if err := redis.SRem(ctx, indexKey, campaignID).Err(); err != nil {
+		log.Error("Failed to remove campaign from user index",
+			zap.String("userID", userID),
+			zap.String("campaignID", campaignID),
+			zap.Error(err))
+		return fmt.Errorf("failed to remove campaign from user index: %w", err)
+	}
+
+	return nil
+}
+
+// InvalidateQueryCache invalidates all query cache for a specific user
+func InvalidateQueryCache(ctx context.Context, userID string) error {
+	log := logger.GetLoggerWithoutContext()
+	redis := redis_provider.Client
+
+	// Delete all query cache keys for this user
+	queryPattern := fmt.Sprintf("campaign:user:%s:*", userID)
+	queryCacheKeys, err := redis.Keys(ctx, queryPattern).Result()
+	if err != nil {
+		log.Error("Failed to get query cache keys", zap.Error(err))
+		return fmt.Errorf("failed to get query cache keys: %w", err)
+	}
+
+	// Filter out individual campaign keys and index key
+	var filteredQueryKeys []string
+	for _, key := range queryCacheKeys {
+		if !strings.Contains(key, ":index") && !isIndividualCampaignKey(key) {
+			filteredQueryKeys = append(filteredQueryKeys, key)
+		}
+	}
+
+	if len(filteredQueryKeys) > 0 {
+		if err := redis.Del(ctx, filteredQueryKeys...).Err(); err != nil {
+			log.Error("Failed to delete query cache keys", zap.Error(err))
+			return fmt.Errorf("failed to delete query cache keys: %w", err)
+		}
+	}
+
+	log.Info("Successfully invalidated query cache for user", zap.String("userID", userID))
+	return nil
 }

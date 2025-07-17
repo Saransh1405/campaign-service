@@ -1,7 +1,0 @@
-{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
-{"level":"ERROR","time":"time.UnixDate","method":"users-service/library/redis_provider.NewConnection","msg":"Binding fail","error":"config redis error : Config File \"redis\" Not Found in \"[C:\\\\Users\\\\HP-PC\\\\Desktop\\\\TribeWthVibe\\\\campaign-service\\\\resources]\""}
-{"level":"ERROR","time":"time.UnixDate","method":"users-service/library/redis_provider.NewConnection","msg":"Binding fail","error":"config redis error : Config File \"redis\" Not Found in \"[C:\\\\Users\\\\HP-PC\\\\Desktop\\\\TribeWthVibe\\\\campaign-service\\\\resources]\""}
-{"level":"ERROR","time":"time.UnixDate","method":"main.main","msg":"external service failure error","error":"configuration is missing for redis"}
-{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
-{"level":"ERROR","time":"time.UnixDate","method":"main.main","msg":"external service failure error","error":"configuration is missing for redis"}
-{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}

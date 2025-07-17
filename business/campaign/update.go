@@ -135,6 +135,7 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 				if err := json.Unmarshal([]byte(campaignData), &existingCampaign); err != nil {
 					log.With(zap.Error(err)).Error("Failed to unmarshal campaign from redis")
 				}
+				log.Info("***************get the campaign from redis****************")
 			} else {
 				// Not found in Redis, get from DB
 				db := postgres.DB
@@ -143,6 +144,7 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 					log.With(zap.Error(errors.New(constants.CampaignNotFoundMessage))).Error(constants.CampaignNotFoundMessage)
 					camapignGetErrCh <- errors.New(constants.CampaignNotFoundMessage)
 				}
+				log.Info("***************get the campaign from postgres****************")
 			}
 
 			campaignModelCh <- &existingCampaign
@@ -252,8 +254,27 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		backgroundContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		if err := helperfunctions.InvalidateAllCampaignUserCache(&backgroundContext, userID); err != nil {
+		if err := helperfunctions.InvalidateAllCampaignUserCache(backgroundContext, userID); err != nil {
 			log.With(zap.Error(err)).Error("Failed to invalidate campaign user cache")
+		}
+	}()
+
+	// Re-cache the updated campaign and update the user's index set
+	go func() {
+		backgroundContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		campaignKey := fmt.Sprintf("campaign:user:%s:%s", userID, *campaign.ID)
+		campaignJSON, err := json.Marshal(newCampaign)
+		if err != nil {
+			log.With(zap.Error(err)).Error("Failed to marshal updated campaign for Redis")
+			return
+		}
+		if err := redis_provider.Client.Set(backgroundContext, campaignKey, campaignJSON, 15*time.Minute).Err(); err != nil {
+			log.With(zap.Error(err)).Error("Failed to set updated campaign in Redis")
+		}
+		if err := helperfunctions.AddCampaignToUserIndex(backgroundContext, userID, *campaign.ID); err != nil {
+			log.With(zap.Error(err)).Error("Failed to add campaign ID to user index set")
 		}
 	}()
 
