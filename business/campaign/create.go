@@ -6,6 +6,8 @@ import (
 	"campaign-service/library/postgres"
 	"campaign-service/logger"
 	"campaign-service/models"
+	"campaign-service/utils/helperfunctions"
+	"context"
 	"errors"
 	"sync"
 	"time"
@@ -130,6 +132,15 @@ func CreateCampaign(ctx *gin.Context, campaign *models.CreateCampaignRequest) er
 	go func() {
 		if err := PublishDataToKafka(campaignModel, string(models.CreateCampaignEvent)); err != nil {
 			log.With(zap.Error(err)).Error("Failed to publish campaign event to kafka")
+		}
+	}()
+
+	go func() {
+		backgroundContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := helperfunctions.InvalidateAllCampaignUserCache(backgroundContext, userID); err != nil {
+			log.With(zap.Error(err)).Error("Failed to invalidate campaign user cache")
 		}
 	}()
 

@@ -19,8 +19,12 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 
 	db := postgres.DB
 
-	var wg sync.WaitGroup
-	errCh := make(chan error, 2)
+	// start a transaction
+	tx := db.Begin()
+	if tx.Error != nil {
+		log.Error("Error in starting transaction", zap.Error(tx.Error))
+		return fmt.Errorf("failed to start transaction: %w", tx.Error)
+	}
 
 	// create the campaign object
 	campaign := models.Campaign{
@@ -44,8 +48,13 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 		UpdatedAt:       campaignData.UpdatedAt,
 	}
 	if result := db.Save(&campaign); result.Error != nil {
-		errCh <- fmt.Errorf("failed to save campaign: %w", result.Error)
+		tx.Rollback()
+		log.Error("Error in saving campaign", zap.Error(result.Error))
+		return fmt.Errorf("failed to save campaign: %w", result.Error)
 	}
+
+	var wg sync.WaitGroup
+	errCh := make(chan error, 2)
 
 	wg.Add(1)
 	go func() {
@@ -67,6 +76,7 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 			UpdatedAt:  campaignData.Location.UpdatedAt,
 		}
 		if result := db.Save(&location); result.Error != nil {
+			tx.Rollback()
 			errCh <- fmt.Errorf("failed to save location: %w", result.Error)
 		}
 
@@ -85,6 +95,7 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 			Timestamp:      time.Now().UnixMilli(), // Use int64 timestamp
 		}
 		if result := db.Create(&statusLogs); result.Error != nil {
+			tx.Rollback()
 			errCh <- fmt.Errorf("failed to create status logs: %w", result.Error)
 		}
 	}()
@@ -97,6 +108,11 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 	for err := range errCh {
 		log.Error("Error in saving campaign", zap.Error(err))
 		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		log.Error("Error in committing transaction", zap.Error(err))
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	log.Info("Campaign event published to kafka")
@@ -127,6 +143,13 @@ func UpdateCampaignInPostgres(campaignData map[string]interface{}, updateFields 
 
 	db := postgres.DB
 
+	// start a transaction
+	tx := db.Begin()
+	if tx.Error != nil {
+		log.Error("Error in starting transaction", zap.Error(tx.Error))
+		return fmt.Errorf("failed to start transaction: %w", tx.Error)
+	}
+
 	// Remove location from updateFields since it's handled separately
 	delete(updateFields, "location")
 
@@ -139,6 +162,7 @@ func UpdateCampaignInPostgres(campaignData map[string]interface{}, updateFields 
 	// Update the campaign with only the changed fields
 	if result := db.Model(&models.Campaign{}).Where("id = ?", campaign.ID).Updates(updateFields); result.Error != nil {
 		log.Error("Error in updating campaign", zap.Error(result.Error))
+		tx.Rollback()
 		return fmt.Errorf("failed to update campaign: %w", result.Error)
 	}
 
@@ -165,6 +189,7 @@ func UpdateCampaignInPostgres(campaignData map[string]interface{}, updateFields 
 
 			if result := db.Model(&models.Location{}).Where("campaign_id = ?", campaign.ID).Updates(locationUpdate); result.Error != nil {
 				log.Error("Error in updating location", zap.Error(result.Error))
+				tx.Rollback()
 				errCh <- fmt.Errorf("failed to update location: %w", result.Error)
 			}
 		}
@@ -186,6 +211,7 @@ func UpdateCampaignInPostgres(campaignData map[string]interface{}, updateFields 
 
 		if result := db.Create(&statusLogs); result.Error != nil {
 			log.Error("Error in creating status logs", zap.Error(result.Error))
+			tx.Rollback()
 			errCh <- fmt.Errorf("failed to create status logs: %w", result.Error)
 		}
 	}()
@@ -198,6 +224,11 @@ func UpdateCampaignInPostgres(campaignData map[string]interface{}, updateFields 
 	for err := range errCh {
 		log.Error("Error in updating campaign", zap.Error(err))
 		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		log.Error("Error in committing transaction", zap.Error(err))
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	log.Info("Campaign updated successfully in database")

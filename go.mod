@@ -2,8 +2,6 @@ module campaign-service
 
 go 1.23.0
 
-toolchain go1.23.10
-
 require (
 	github.com/IBM/sarama v1.45.2
 	github.com/gin-gonic/gin v1.10.1
