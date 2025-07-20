@@ -278,6 +278,26 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		}
 	}()
 
+	// Update campaign in spatial index
+	go func() {
+		backgroundContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		// Remove from spatial index first (if location changed)
+		if campaign.Location != nil {
+			if err := helperfunctions.RemoveCampaignFromSpatialIndex(backgroundContext, newCampaign.ID.String()); err != nil {
+				log.With(zap.Error(err)).Error("Failed to remove campaign from spatial index")
+			}
+		}
+
+		// Add to spatial index with new location
+		if newCampaign.Location != nil {
+			if err := helperfunctions.AddCampaignToSpatialIndex(backgroundContext, newCampaign.ID.String(), newCampaign.Location.Latitude, newCampaign.Location.Longitude); err != nil {
+				log.With(zap.Error(err)).Error("Failed to add campaign to spatial index")
+			}
+		}
+	}()
+
 	return nil
 }
 

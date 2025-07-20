@@ -150,6 +150,9 @@ type GetCampaignRequest struct {
 	Country   string   `form:"country"`
 	MinPrice  int64    `form:"min_price"`
 	MaxPrice  int64    `form:"max_price"`
+	Latitude  string   `form:"latitude"`
+	Longitude string   `form:"longitude"`
+	Radius    string   `form:"radius"`
 	StartDate string   `form:"start_date"` // YYYY-MM-DD
 	EndDate   string   `form:"end_date"`   // YYYY-MM-DD
 	Tags      []string `form:"tags"`

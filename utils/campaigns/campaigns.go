@@ -5,7 +5,6 @@ import (
 	"campaign-service/logger"
 	"campaign-service/models"
 	"encoding/json"
-	"sync"
 	"time"
 
 	"fmt"
@@ -53,61 +52,40 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 		return fmt.Errorf("failed to save campaign: %w", result.Error)
 	}
 
-	var wg sync.WaitGroup
-	errCh := make(chan error, 2)
+	// create the location object
+	location := models.Location{
+		ID:         uuid.New(),
+		CampaignID: campaignData.ID,
+		Name:       campaignData.Location.Name,
+		Address:    campaignData.Location.Address,
+		Latitude:   campaignData.Location.Latitude,
+		Longitude:  campaignData.Location.Longitude,
+		City:       campaignData.Location.City,
+		State:      campaignData.Location.State,
+		Country:    campaignData.Location.Country,
+		ZipCode:    campaignData.Location.ZipCode,
+		CreatedAt:  campaignData.Location.CreatedAt,
+		UpdatedAt:  campaignData.Location.UpdatedAt,
+	}
+	if result := db.Save(&location); result.Error != nil {
+		tx.Rollback()
+		log.Error("Error in saving location", zap.Error(result.Error))
+		return fmt.Errorf("failed to save location: %w", result.Error)
+	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		// create the location object
-		location := models.Location{
-			ID:         uuid.New(),
-			CampaignID: campaignData.ID,
-			Name:       campaignData.Location.Name,
-			Address:    campaignData.Location.Address,
-			Latitude:   campaignData.Location.Latitude,
-			Longitude:  campaignData.Location.Longitude,
-			City:       campaignData.Location.City,
-			State:      campaignData.Location.State,
-			Country:    campaignData.Location.Country,
-			ZipCode:    campaignData.Location.ZipCode,
-			CreatedAt:  campaignData.Location.CreatedAt,
-			UpdatedAt:  campaignData.Location.UpdatedAt,
-		}
-		if result := db.Save(&location); result.Error != nil {
-			tx.Rollback()
-			errCh <- fmt.Errorf("failed to save location: %w", result.Error)
-		}
-
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		// create the status logs object
-		statusLogs := models.StatusLogs{
-			ID:             uuid.New(),
-			CampaignID:     campaignData.ID,
-			Status:         models.Active, // Use enum instead of string
-			Notes:          "Campaign created",
-			ActionByUserId: campaignData.UserID,
-			Timestamp:      time.Now().UnixMilli(), // Use int64 timestamp
-		}
-		if result := db.Create(&statusLogs); result.Error != nil {
-			tx.Rollback()
-			errCh <- fmt.Errorf("failed to create status logs: %w", result.Error)
-		}
-	}()
-
-	go func() {
-		wg.Wait()
-		close(errCh)
-	}()
-
-	for err := range errCh {
-		log.Error("Error in saving campaign", zap.Error(err))
-		return err
+	// create the status logs object
+	statusLogs := models.StatusLogs{
+		ID:             uuid.New(),
+		CampaignID:     campaignData.ID,
+		Status:         models.Active, // Use enum instead of string
+		Notes:          "Campaign created",
+		ActionByUserId: campaignData.UserID,
+		Timestamp:      time.Now().UnixMilli(), // Use int64 timestamp
+	}
+	if result := db.Create(&statusLogs); result.Error != nil {
+		tx.Rollback()
+		log.Error("Error in creating status logs", zap.Error(result.Error))
+		return fmt.Errorf("failed to create status logs: %w", result.Error)
 	}
 
 	if err := tx.Commit().Error; err != nil {
@@ -166,64 +144,41 @@ func UpdateCampaignInPostgres(campaignData map[string]interface{}, updateFields 
 		return fmt.Errorf("failed to update campaign: %w", result.Error)
 	}
 
-	var wg sync.WaitGroup
-	errCh := make(chan error, 2)
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		// Update location if provided
-		if campaign.Location != nil {
-			locationUpdate := map[string]interface{}{
-				"name":       campaign.Location.Name,
-				"address":    campaign.Location.Address,
-				"latitude":   campaign.Location.Latitude,
-				"longitude":  campaign.Location.Longitude,
-				"city":       campaign.Location.City,
-				"state":      campaign.Location.State,
-				"country":    campaign.Location.Country,
-				"zip_code":   campaign.Location.ZipCode,
-				"updated_at": time.Now().UnixMilli(),
-			}
-
-			if result := db.Model(&models.Location{}).Where("campaign_id = ?", campaign.ID).Updates(locationUpdate); result.Error != nil {
-				log.Error("Error in updating location", zap.Error(result.Error))
-				tx.Rollback()
-				errCh <- fmt.Errorf("failed to update location: %w", result.Error)
-			}
-		}
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		// Add status log entry
-		statusLogs := models.StatusLogs{
-			ID:             uuid.New(),
-			CampaignID:     campaign.ID,
-			Status:         models.Active, // Use lowercase string to match enum
-			Notes:          "Campaign updated",
-			ActionByUserId: campaign.UserID,
-			Timestamp:      time.Now().UnixMilli(),
+	// Update location if provided
+	if campaign.Location != nil {
+		locationUpdate := map[string]interface{}{
+			"name":       campaign.Location.Name,
+			"address":    campaign.Location.Address,
+			"latitude":   campaign.Location.Latitude,
+			"longitude":  campaign.Location.Longitude,
+			"city":       campaign.Location.City,
+			"state":      campaign.Location.State,
+			"country":    campaign.Location.Country,
+			"zip_code":   campaign.Location.ZipCode,
+			"updated_at": time.Now().UnixMilli(),
 		}
 
-		if result := db.Create(&statusLogs); result.Error != nil {
-			log.Error("Error in creating status logs", zap.Error(result.Error))
+		if result := db.Model(&models.Location{}).Where("campaign_id = ?", campaign.ID).Updates(locationUpdate); result.Error != nil {
+			log.Error("Error in updating location", zap.Error(result.Error))
 			tx.Rollback()
-			errCh <- fmt.Errorf("failed to create status logs: %w", result.Error)
+			return fmt.Errorf("failed to update location: %w", result.Error)
 		}
-	}()
+	}
 
-	go func() {
-		wg.Wait()
-		close(errCh)
-	}()
+	// Add status log entry
+	statusLogs := models.StatusLogs{
+		ID:             uuid.New(),
+		CampaignID:     campaign.ID,
+		Status:         models.Active, // Use lowercase string to match enum
+		Notes:          "Campaign updated",
+		ActionByUserId: campaign.UserID,
+		Timestamp:      time.Now().UnixMilli(),
+	}
 
-	for err := range errCh {
-		log.Error("Error in updating campaign", zap.Error(err))
-		return err
+	if result := db.Create(&statusLogs); result.Error != nil {
+		log.Error("Error in creating status logs", zap.Error(result.Error))
+		tx.Rollback()
+		return fmt.Errorf("failed to create status logs: %w", result.Error)
 	}
 
 	if err := tx.Commit().Error; err != nil {

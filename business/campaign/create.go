@@ -144,6 +144,18 @@ func CreateCampaign(ctx *gin.Context, campaign *models.CreateCampaignRequest) er
 		}
 	}()
 
+	// Add campaign to spatial index
+	go func() {
+		backgroundContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if campaignModel.Location != nil {
+			if err := helperfunctions.AddCampaignToSpatialIndex(backgroundContext, campaignModel.ID.String(), campaignModel.Location.Latitude, campaignModel.Location.Longitude); err != nil {
+				log.With(zap.Error(err)).Error("Failed to add campaign to spatial index")
+			}
+		}
+	}()
+
 	return nil
 }
 

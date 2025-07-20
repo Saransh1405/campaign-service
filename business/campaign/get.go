@@ -86,8 +86,6 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 		cacheKey += fmt.Sprintf(":limit:%d", request.Limit)
 	}
 
-	fmt.Printf("cacheKey: %s\n", cacheKey)
-
 	// Try to get cached results for this specific query
 	cachedResult, err := redis.Get(ctx, cacheKey).Result()
 	if err == nil && cachedResult != "" {

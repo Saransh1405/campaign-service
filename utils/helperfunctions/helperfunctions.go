@@ -463,3 +463,18 @@ func InvalidateQueryCache(ctx context.Context, userID string) error {
 	log.Info("Successfully invalidated query cache for user", zap.String("userID", userID))
 	return nil
 }
+
+// AddCampaignToSpatialIndex adds a campaign to the spatial index
+func AddCampaignToSpatialIndex(ctx context.Context, campaignID string, latitude, longitude float64) error {
+	return redis_provider.AddCampaignToSpatialIndex(ctx, campaignID, latitude, longitude)
+}
+
+// RemoveCampaignFromSpatialIndex removes a campaign from the spatial index
+func RemoveCampaignFromSpatialIndex(ctx context.Context, campaignID string) error {
+	return redis_provider.RemoveCampaignFromSpatialIndex(ctx, campaignID)
+}
+
+// GetCampaignsInRadius gets campaign IDs within a specified radius
+func GetCampaignsInRadius(ctx context.Context, latitude, longitude, radius float64, unit string) ([]string, error) {
+	return redis_provider.GetCampaignsInRadius(ctx, latitude, longitude, radius, unit)
+}
