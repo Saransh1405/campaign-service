@@ -200,7 +200,12 @@ func ErrorBasedOnResponse(ctx *gin.Context, msg string, respType int, err error)
 		errors.New(constants.InvalidStartDateMessage).Error(), errors.New(constants.InvalidEndDateMessage).Error(), errors.New(constants.EndDateBeforeStartDateMessage).Error(),
 		errors.New(constants.MaxParticipantsLessThanMinParticipants).Error(),
 		errors.New(constants.PriceMustBeGreaterThanZero).Error(),
-		errors.New(constants.FailedToFetchCampaignsMessage).Error():
+		errors.New(constants.FailedToFetchCampaignsMessage).Error(),
+		errors.New(constants.UserNotVerifiedMessage).Error(),
+		errors.New(constants.CampaignFullMessage).Error(),
+		errors.New(constants.UserNotParticipantMessage).Error(),
+		errors.New(constants.FailedToUpdateParticipantStatusMessage).Error(),
+		errors.New(constants.UserAlreadyInCampaignMessage).Error():
 		SendBadRequest(ctx, msg, constants.WLBadRequestCode, respType, err)
 
 	//401

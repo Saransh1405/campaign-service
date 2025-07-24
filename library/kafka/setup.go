@@ -7,7 +7,7 @@ import (
 )
 
 // kafka command
-// kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 --topic update_campaign
+// kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 --topic campaign_activity
 
 func NewConnection() {
 	// get application configs

@@ -1,11 +1,4 @@
-version: "3"
-
-networks:
-  app-tier:
-    driver: bridge
-
 services:
-
   zookeeper:
     image: wurstmeister/zookeeper:latest
     container_name: zookeeper

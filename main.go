@@ -4,6 +4,7 @@ import (
 	"campaign-service/api"
 	"campaign-service/constants"
 	"campaign-service/library/kafka"
+	"campaign-service/library/mongoDb"
 	"campaign-service/library/postgres"
 	"campaign-service/library/redis_provider"
 	"campaign-service/logger"
@@ -49,6 +50,9 @@ func main() {
 
 	// Connect a kafka
 	kafka.NewConnection()
+
+	// Connect to MongoDB
+	mongoDb.InitMongoDB()
 
 	// Connect a redis
 	err := redis_provider.NewConnection(ctx, logger.GetLoggerWithoutContext())

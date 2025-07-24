@@ -31,6 +31,7 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 		UserID:          campaignData.UserID,
 		Name:            campaignData.Name,
 		Description:     campaignData.Description,
+		AutoAccept:      campaignData.AutoAccept,
 		Type:            campaignData.Type,
 		ImageURL:        campaignData.ImageURL,
 		DisplayName:     campaignData.DisplayName,
@@ -46,6 +47,7 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 		CreatedAt:       campaignData.CreatedAt,
 		UpdatedAt:       campaignData.UpdatedAt,
 	}
+
 	if result := db.Save(&campaign); result.Error != nil {
 		tx.Rollback()
 		log.Error("Error in saving campaign", zap.Error(result.Error))

@@ -31,6 +31,18 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		return errors.New(constants.UserNotFoundMessage)
 	}
 
+	// validate the user exists
+	user, err := helperfunctions.ValidateUserExists(ctx, userID)
+	if err != nil {
+		log.With(zap.Error(err)).Error(constants.UserNotFoundMessage)
+		return err
+	}
+
+	if !user.EmailVerified {
+		log.With(zap.Error(errors.New(constants.UserNotVerifiedMessage))).Error(constants.UserNotVerifiedMessage)
+		return errors.New(constants.UserNotVerifiedMessage)
+	}
+
 	var wg sync.WaitGroup
 	errCh := make(chan error, 5)
 
@@ -93,7 +105,7 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		defer wg.Done()
 
 		// Validate name is valid check in db if it already exists
-		if *campaign.Name != "" {
+		if campaign.Name != nil {
 			db := postgres.DB
 			campaignModel := db.Model(&models.Campaign{}).Where("name = ? AND id != ?", *campaign.Name, *campaign.ID).First(&models.Campaign{})
 			if campaignModel.Error == nil {
@@ -175,6 +187,11 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 	if campaign.Description != nil {
 		newCampaign.Description = *campaign.Description
 		updateFields["description"] = *campaign.Description
+	}
+
+	if campaign.AutoAccept != nil {
+		newCampaign.AutoAccept = *campaign.AutoAccept
+		updateFields["auto_accept"] = campaign.AutoAccept
 	}
 
 	if campaign.ImageURL != nil {

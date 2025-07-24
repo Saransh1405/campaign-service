@@ -1,10 +1,12 @@
 package nearby
 
 import (
+	"campaign-service/constants"
 	"campaign-service/library/postgres"
 	"campaign-service/logger"
 	"campaign-service/models"
 	"campaign-service/utils/helperfunctions"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -14,7 +16,22 @@ import (
 
 // GetNearbyCampaigns finds campaigns near a specific location using spatial index
 func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([]*models.Campaign, int64, error) {
+	//get the logger
 	log := logger.GetLoggerWithoutContext()
+
+	//get the client name from the request
+	userID := request.UserID
+	if userID == "" {
+		log.With(zap.Error(errors.New(constants.UserNotFoundMessage))).Error(constants.UserNotFoundMessage)
+		return nil, 0, errors.New(constants.UserNotFoundMessage)
+	}
+
+	// validate the user exists
+	_, err := helperfunctions.ValidateUserExists(ctx, userID)
+	if err != nil {
+		log.With(zap.Error(err)).Error(constants.UserNotFoundMessage)
+		return nil, 0, err
+	}
 
 	// Parse location parameters from request
 	latitudeStr := request.Latitude

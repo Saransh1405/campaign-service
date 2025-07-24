@@ -64,4 +64,6 @@ const (
 	DocumentsForEnlistingWithAccountId = "/documentsForEnlisting/:businessId"
 	Campaign                           = "/campaign"
 	CampaignNearby                     = "/campaign/nearby"
+	CampaignJoin                       = "/campaign/join"
+	CampaignLeave                      = "/campaign/leave"
 )

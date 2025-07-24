@@ -14,6 +14,7 @@ type Campaign struct {
 	Type        string    `json:"type" gorm:"not null;size:100"` // cricket, football, etc.
 	ImageURL    string    `json:"image_url" gorm:"size:500"`
 	DisplayName string    `json:"display_name" gorm:"size:255"`
+	AutoAccept  bool      `json:"auto_accept" gorm:"column:auto_accept"`
 
 	// Timing
 	StartDate int64 `json:"start_date" gorm:"not null"`
@@ -61,7 +62,7 @@ type Location struct {
 
 type Participant struct {
 	ID         uuid.UUID         `json:"id" gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	UserID     uuid.UUID         `json:"user_id" gorm:"type:uuid;not null"`
+	UserID     string            `json:"user_id" gorm:"type:string;not null"`
 	CampaignID uuid.UUID         `json:"campaign_id" gorm:"type:uuid;not null"`
 	JoinedAt   int64             `json:"joined_at" gorm:"autoCreateTime"`
 	LeftAt     int64             `json:"left_at,omitempty"`
@@ -108,6 +109,7 @@ type CreateCampaignRequest struct {
 	UserID          string          `json:"user_id" binding:"required"`
 	Name            string          `json:"name" binding:"required,min=3,max=255"`
 	Description     string          `json:"description" binding:"required,min=10"`
+	AutoAccept      *bool           `json:"auto_accept"`
 	Type            string          `json:"type" binding:"required"`
 	ImageURL        string          `json:"image_url" binding:"url"`
 	DisplayName     string          `json:"display_name"`
@@ -125,6 +127,7 @@ type CreateCampaignRequest struct {
 type UpdateCampaignRequest struct {
 	ID              *string         `json:"id" binding:"required"`
 	UserID          string          `json:"user_id" binding:"required"`
+	AutoAccept      *bool           `json:"auto_accept" gorm:"default:true"`
 	Name            *string         `json:"name,omitempty"`
 	Description     *string         `json:"description,omitempty"`
 	ImageURL        *string         `json:"image_url,omitempty"`
@@ -160,9 +163,20 @@ type GetCampaignRequest struct {
 	SortOrder string   `form:"sort_order"` // asc, desc
 }
 
+type AcceptCampaignRequest struct {
+	CampaignID string `json:"campaign_id" binding:"required"`
+	UserID     string `json:"user_id" binding:"required"`
+}
+
 type CampaignEvent struct {
 	Campaign         map[string]interface{} `json:"campaign"`
 	UpdateFields     map[string]interface{} `json:"update_fields"`
 	EventPublishTime int64                  `json:"event_publish_time"`
 	EventType        string                 `json:"event_type"`
+}
+
+type ActivityEvent struct {
+	Participant      map[string]interface{} `json:"participant"`
+	EventPublishTime int64                  `json:"event_publish_time"`
+	Action           string                 `json:"action"`
 }

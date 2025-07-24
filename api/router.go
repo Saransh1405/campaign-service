@@ -2,6 +2,7 @@ package api
 
 import (
 	"campaign-service/api/campaign"
+	"campaign-service/api/join"
 	"campaign-service/api/nearby"
 	"campaign-service/constants"
 	"campaign-service/utils"
@@ -60,6 +61,12 @@ func GetRouter(localizationMiddleware gin.HandlerFunc, loggerMiddleware gin.Hand
 
 		// Handle the GET requests at /v1/campaign/nearby
 		v1Routes.GET(constants.CampaignNearby, nearby.GetCampaign)
+
+		// Handle the PATCH requests at /v1/campaign/join
+		v1Routes.PATCH(constants.CampaignJoin, join.JoinCampaign)
+
+		// Handle the PATCH requests at /v1/campaign/leave
+		v1Routes.PATCH(constants.CampaignLeave, join.LeaveCampaign)
 
 	}
 

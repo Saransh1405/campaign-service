@@ -2,6 +2,7 @@ package helperfunctions
 
 import (
 	"campaign-service/constants"
+	"campaign-service/library/mongoDb"
 	"campaign-service/library/postgres"
 	"campaign-service/library/redis_provider"
 	"campaign-service/logger"
@@ -19,6 +20,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
 )
 
@@ -180,6 +183,31 @@ func AddLogs(trigger, enitity, enitityId, clientName, actionById string, oldData
 		fmt.Printf("insert.Error: %v\n", insert.Error)
 	}
 
+}
+
+// validate the user if it exists
+func ValidateUserExists(ctx context.Context, userID string) (models.Users, error) {
+	log := logger.GetLoggerWithoutContext()
+
+	// get the user collection
+	userCollection := mongoDb.GetCollection(constants.MongoUserCollection)
+
+	// convert string to object id
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		log.Error("Failed to convert userID to objectID", zap.Error(err))
+		return models.Users{}, err
+	}
+
+	// find if the user exists in the database
+	var user models.Users
+	err = userCollection.FindOne(ctx, bson.M{"_id": userObjID, "status": "Active"}).Decode(&user)
+	if err != nil {
+		log.Error("Failed to get user by ID", zap.Error(err))
+		return models.Users{}, err
+	}
+
+	return user, nil
 }
 
 // InvalidateAllCampaignUserCache invalidates all campaign-related cache for a specific user

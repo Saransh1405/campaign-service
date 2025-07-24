@@ -95,6 +95,11 @@ const (
 	CampaignNameAlreadyExistsMessage       = "errors.CampaignNameAlreadyExists"
 	CampaignNotFoundMessage                = "errors.CampaignNotFound"
 	FailedToFetchCampaignsMessage          = "errors.FailedToFetchCampaigns"
+	UserNotVerifiedMessage                 = "errors.UserNotVerified"
+	CampaignFullMessage                    = "errors.CampaignFull"
+	UserAlreadyInCampaignMessage           = "errors.UserAlreadyInCampaign"
+	UserNotParticipantMessage              = "errors.UserNotParticipant"
+	FailedToUpdateParticipantStatusMessage = "errors.FailedToUpdateParticipantStatus"
 )
 
 // Trigger Messages

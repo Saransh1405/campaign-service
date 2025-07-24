@@ -34,6 +34,11 @@
         "PriceMustBeGreaterThanZero": "Price must be greater than zero.",
         "CampaignNameAlreadyExists": "Campaign name already exists.",
         "CampaignNotFound": "Campaign not found.",
-        "FailedToFetchCampaigns": "Failed to fetch campaigns."
+        "FailedToFetchCampaigns": "Failed to fetch campaigns.",
+        "UserNotVerified": "User not verified. Please verify your email to join the campaign.",
+        "CampaignFull": "Campaign is full. Please try different campaign.",
+        "UserAlreadyInCampaign": "User already in campaign.",
+        "UserNotParticipant": "User is not a participant of this campaign.",
+        "FailedToUpdateParticipantStatus": "Failed to update participant status."
     }
 }

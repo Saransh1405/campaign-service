@@ -1,0 +1,103 @@
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"Binding fail","error":"config mongo error : Config File \"mongo\" Not Found in \"[C:\\\\Users\\\\HP-PC\\\\Desktop\\\\TribeWthVibe\\\\campaign-service\\\\resources]\""}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb://localhost:27017."}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"3f219215-67ed-11f0-8cb7-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/utils/helperfunctions.ValidateRequestData","msg":"Binding fail","requestId":"3f219215-67ed-11f0-8cb7-ca9402a7dd3b","error":"Key: 'UpdateCampaignRequest.ID' Error:Field validation for 'ID' failed on the 'required' tag\nKey: 'UpdateCampaignRequest.UserID' Error:Field validation for 'UserID' failed on the 'required' tag"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"3f219215-67ed-11f0-8cb7-ca9402a7dd3b","requestId":"3f219215-67ed-11f0-8cb7-ca9402a7dd3b","statusCode":400,"Latency":20,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"4ed67800-67ed-11f0-8cb7-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/utils/helperfunctions.ValidateRequestData","msg":"Binding fail","requestId":"4ed67800-67ed-11f0-8cb7-ca9402a7dd3b","error":"Key: 'UpdateCampaignRequest.ID' Error:Field validation for 'ID' failed on the 'required' tag"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"4ed67800-67ed-11f0-8cb7-ca9402a7dd3b","requestId":"4ed67800-67ed-11f0-8cb7-ca9402a7dd3b","statusCode":400,"Latency":122,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"a34f16cc-67ed-11f0-8cb7-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/utils/helperfunctions.ValidateUserExists","msg":"Failed to get user by ID","error":"mongo: no documents in result"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/business/join.JoinCampaign","msg":"errors.UserNotFound","error":"mongo: no documents in result"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/api/join.JoinCampaign","msg":"external service failure error","requestId":"a34f16cc-67ed-11f0-8cb7-ca9402a7dd3b","error":"mongo: no documents in result"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"a34f16cc-67ed-11f0-8cb7-ca9402a7dd3b","requestId":"a34f16cc-67ed-11f0-8cb7-ca9402a7dd3b","statusCode":500,"Latency":70,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb://localhost:27017."}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"292058e1-67ee-11f0-9228-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/utils/helperfunctions.ValidateUserExists","msg":"Failed to get user by ID","error":"mongo: no documents in result"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/business/join.JoinCampaign","msg":"errors.UserNotFound","error":"mongo: no documents in result"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/api/join.JoinCampaign","msg":"external service failure error","requestId":"292058e1-67ee-11f0-9228-ca9402a7dd3b","error":"errors.UserNotFound"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"292058e1-67ee-11f0-9228-ca9402a7dd3b","requestId":"292058e1-67ee-11f0-9228-ca9402a7dd3b","statusCode":404,"Latency":12,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb://localhost:27017."}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"c27ff808-67ee-11f0-9eaf-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/business/join.JoinCampaign","msg":"errors.UserNotVerified","error":"errors.UserNotVerified"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/api/join.JoinCampaign","msg":"external service failure error","requestId":"c27ff808-67ee-11f0-9eaf-ca9402a7dd3b","error":"errors.UserNotVerified"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"c27ff808-67ee-11f0-9eaf-ca9402a7dd3b","requestId":"c27ff808-67ee-11f0-9eaf-ca9402a7dd3b","statusCode":400,"Latency":57,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"608377ed-67ef-11f0-9eaf-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/business/join.JoinCampaign","msg":"errors.CampaignNotFound","error":"redis: nil"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/api/join.JoinCampaign","msg":"external service failure error","requestId":"608377ed-67ef-11f0-9eaf-ca9402a7dd3b","error":"errors.CampaignNotFound"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"608377ed-67ef-11f0-9eaf-ca9402a7dd3b","requestId":"608377ed-67ef-11f0-9eaf-ca9402a7dd3b","statusCode":404,"Latency":19,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb://localhost:27017."}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"1aaf429f-67f0-11f0-946e-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/business/join.JoinCampaign","msg":"errors.CampaignNotFound","error":"redis: nil"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/api/join.JoinCampaign","msg":"external service failure error","requestId":"1aaf429f-67f0-11f0-946e-ca9402a7dd3b","error":"errors.CampaignNotFound"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"1aaf429f-67f0-11f0-946e-ca9402a7dd3b","requestId":"1aaf429f-67f0-11f0-946e-ca9402a7dd3b","statusCode":404,"Latency":53,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb://localhost:27017."}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"b9040dfd-67f0-11f0-bfa9-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/business/join.JoinCampaign","msg":"Redis error","error":"redis: nil"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/api/join.JoinCampaign","msg":"external service failure error","requestId":"b9040dfd-67f0-11f0-bfa9-ca9402a7dd3b","error":"redis: nil"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"b9040dfd-67f0-11f0-bfa9-ca9402a7dd3b","requestId":"b9040dfd-67f0-11f0-bfa9-ca9402a7dd3b","statusCode":500,"Latency":76,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb://localhost:27017."}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"1273530f-67f1-11f0-b432-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/business/join.JoinCampaign","msg":"failed to check if user is already in the campaign","error":"ERROR: invalid input syntax for type uuid: \"68580af9a29d1372aa1b8c8b\" (SQLSTATE 22P02)"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/api/join.JoinCampaign","msg":"external service failure error","requestId":"1273530f-67f1-11f0-b432-ca9402a7dd3b","error":"errors.UserAlreadyInCampaign"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"1273530f-67f1-11f0-b432-ca9402a7dd3b","requestId":"1273530f-67f1-11f0-b432-ca9402a7dd3b","statusCode":400,"Latency":69,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"300d1b1e-67f1-11f0-b432-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/utils/helperfunctions.ValidateUserExists","msg":"Failed to get user by ID","error":"mongo: no documents in result"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/business/join.JoinCampaign","msg":"errors.UserNotFound","error":"mongo: no documents in result"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/api/join.JoinCampaign","msg":"external service failure error","requestId":"300d1b1e-67f1-11f0-b432-ca9402a7dd3b","error":"errors.UserNotFound"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"300d1b1e-67f1-11f0-b432-ca9402a7dd3b","requestId":"300d1b1e-67f1-11f0-b432-ca9402a7dd3b","statusCode":404,"Latency":15,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb://localhost:27017."}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"7412e9c9-67f1-11f0-9fd6-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/utils/helperfunctions.ValidateUserExists","msg":"Failed to get user by ID","error":"mongo: no documents in result"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/business/join.JoinCampaign","msg":"errors.UserNotFound","error":"mongo: no documents in result"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/api/join.JoinCampaign","msg":"external service failure error","requestId":"7412e9c9-67f1-11f0-9fd6-ca9402a7dd3b","error":"errors.UserNotFound"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"7412e9c9-67f1-11f0-9fd6-ca9402a7dd3b","requestId":"7412e9c9-67f1-11f0-9fd6-ca9402a7dd3b","statusCode":404,"Latency":73,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb://localhost:27017."}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"a2868243-67f1-11f0-a226-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/business/join.JoinCampaign","msg":"failed to check if user is already in the campaign","error":"ERROR: invalid input syntax for type uuid: \"68602084cab577ac38ae1609\" (SQLSTATE 22P02)"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/api/join.JoinCampaign","msg":"external service failure error","requestId":"a2868243-67f1-11f0-a226-ca9402a7dd3b","error":"errors.UserAlreadyInCampaign"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"a2868243-67f1-11f0-a226-ca9402a7dd3b","requestId":"a2868243-67f1-11f0-a226-ca9402a7dd3b","statusCode":400,"Latency":53,"clientIP":"::1","error":""}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb://localhost:27017."}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.LoadBundle.func1","msg":"Language List [en]"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"startRequest","requestId":"494373d8-67f2-11f0-aacb-ca9402a7dd3b","startTime":"time.UnixDate"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/business/join.JoinCampaign","msg":"failed to check if user is already in the campaign","error":"record not found"}
+{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/api/join.JoinCampaign","msg":"external service failure error","requestId":"494373d8-67f2-11f0-aacb-ca9402a7dd3b","error":"errors.UserAlreadyInCampaign"}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter.Logger.func2","msg":"summary","requestId":"494373d8-67f2-11f0-aacb-ca9402a7dd3b","requestId":"494373d8-67f2-11f0-aacb-ca9402a7dd3b","statusCode":400,"Latency":60,"clientIP":"::1","error":""}

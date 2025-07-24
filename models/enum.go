@@ -41,3 +41,9 @@ const (
 	UpdateCampaignEvent CampaignEventType = "update_campaign"
 	DeleteCampaignEvent CampaignEventType = "delete_campaign"
 )
+
+type CampaignActivityType string
+
+const (
+	CampaignActivity CampaignActivityType = "campaign_activity"
+)

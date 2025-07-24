@@ -3,7 +3,6 @@ package mongoDb
 import (
 	"campaign-service/constants"
 	"campaign-service/logger"
-	"campaign-service/utils/configs"
 	"context"
 	"errors"
 	"fmt"
@@ -13,7 +12,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.uber.org/zap"
 )
 
 // Connection - Connection structure
@@ -27,15 +25,8 @@ type Connection struct {
 var Client *Connection
 
 // NewConnection - new connection of amqp
-func NewConnection(log logger.Logger) error {
-
-	MongoConfig, err := configs.Get(constants.MongoConfig)
-	if err != nil {
-		log.With(zap.Error(err)).Error(constants.BindingFailedErrr)
-	}
-
-	mongoUrl := MongoConfig.GetString(constants.MongoUrlKey)
-	mongoDatabase := MongoConfig.GetString(constants.MongoDatabaseKey)
+func NewConnection(mongoDatabase, mongoUrl string) error {
+	log := logger.GetLoggerWithoutContext()
 
 	if mongoUrl == "" || mongoDatabase == "" {
 		return errors.New("COnfiguration is missing for mongodb")
@@ -49,6 +40,7 @@ func NewConnection(log logger.Logger) error {
 	ctx := context.Background()
 	clientOptions := options.Client().ApplyURI(mongoUrl)
 
+	var err error
 	mongoClient.Conn, err = mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		return err

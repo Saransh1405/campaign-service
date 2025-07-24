@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"campaign-service/library/kafka/activity"
 	"campaign-service/library/kafka/campaign"
 	"log"
 
@@ -37,6 +38,13 @@ func Connect(brokerList []string, KafkaUsername, KafkaPassword string) error {
 	}
 	campaign.Producer = updateCampaignProducer
 
+	// Create campaign activity producer
+	campaignActivityProducer, err := sarama.NewSyncProducer(brokerList, config)
+	if err != nil {
+		log.Fatalf("Failed to create campaign activity producer: %v", err)
+	}
+	activity.ActivityProducer = campaignActivityProducer
+
 	// Start consumers in background
 	config.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRange()
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
@@ -45,6 +53,11 @@ func Connect(brokerList []string, KafkaUsername, KafkaPassword string) error {
 		// Start Campaign Kafka consumers
 		if err := campaign.StartConsumers(brokerList, config); err != nil {
 			log.Printf("Error starting campaign consumers: %v", err)
+		}
+
+		// Start campaign activity consumers
+		if err := activity.StartActivityConsumer(brokerList, config); err != nil {
+			log.Printf("Error starting campaign activity consumers: %v", err)
 		}
 	}()
 

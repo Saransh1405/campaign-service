@@ -4,6 +4,7 @@ import (
 	"campaign-service/constants"
 	"campaign-service/logger"
 	"campaign-service/models"
+	"campaign-service/utils/helperfunctions"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,6 +27,18 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 	if userID == "" {
 		log.With(zap.Error(errors.New(constants.UserNotFoundMessage))).Error(constants.UserNotFoundMessage)
 		return nil, 0, errors.New(constants.UserNotFoundMessage)
+	}
+
+	// validate the user exists
+	user, err := helperfunctions.ValidateUserExists(ctx, userID)
+	if err != nil {
+		log.With(zap.Error(err)).Error(constants.UserNotFoundMessage)
+		return nil, 0, err
+	}
+
+	if !user.EmailVerified {
+		log.With(zap.Error(errors.New(constants.UserNotVerifiedMessage))).Error(constants.UserNotVerifiedMessage)
+		return nil, 0, errors.New(constants.UserNotVerifiedMessage)
 	}
 
 	redis := redis_provider.Client
@@ -134,7 +147,7 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 
 	// Database operation starts
 	db := postgres.DB
-	query := db.Model(&models.Campaign{}).Preload("Location").Preload("StatusLogs").Where("user_id = ?", userID)
+	query := db.Model(&models.Campaign{}).Preload("Location").Preload("Participants").Preload("StatusLogs").Where("user_id = ?", userID)
 
 	if request.ID != "" {
 		query = query.Where("id = ?", request.ID)
