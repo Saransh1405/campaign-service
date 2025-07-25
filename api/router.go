@@ -1,6 +1,7 @@
 package api
 
 import (
+	"campaign-service/api/accept"
 	"campaign-service/api/campaign"
 	"campaign-service/api/join"
 	"campaign-service/api/nearby"
@@ -67,6 +68,9 @@ func GetRouter(localizationMiddleware gin.HandlerFunc, loggerMiddleware gin.Hand
 
 		// Handle the PATCH requests at /v1/campaign/leave
 		v1Routes.PATCH(constants.CampaignLeave, join.LeaveCampaign)
+
+		// Handle the PATCH requests at /v1/campaign/accept
+		v1Routes.PATCH(constants.CampaignAccept, accept.AcceptCampaign)
 
 	}
 

@@ -66,4 +66,5 @@ const (
 	CampaignNearby                     = "/campaign/nearby"
 	CampaignJoin                       = "/campaign/join"
 	CampaignLeave                      = "/campaign/leave"
+	CampaignAccept                     = "/campaign/accept"
 )

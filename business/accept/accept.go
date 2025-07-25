@@ -43,7 +43,7 @@ func AcceptCampaign(ctx *gin.Context, request *models.AcceptCampaignRequest) err
 
 	// check with campaign exists
 	campaignCol := db.Model(&models.Campaign{}).Where("id = ?", request.CampaignID).First(&models.Campaign{})
-	if campaignCol.Error == nil {
+	if campaignCol.Error == gorm.ErrRecordNotFound {
 		log.With(zap.Error(errors.New(constants.CampaignNotFoundMessage))).Error(constants.CampaignNotFoundMessage)
 		return errors.New(constants.CampaignNotFoundMessage)
 	}
@@ -56,7 +56,12 @@ func AcceptCampaign(ctx *gin.Context, request *models.AcceptCampaignRequest) err
 	}
 
 	// update the participant status
-	status := models.ParticipantStatusActive
+	var status models.ParticipantStatus
+	if request.Accept {
+		status = models.ParticipantStatusActive
+	} else {
+		status = models.ParticipantStatusRejected
+	}
 
 	err = db.Model(&models.Participant{}).Where("user_id = ? AND campaign_id = ?", userID, request.CampaignID).Update("status", status).Error
 	if err != nil {
@@ -66,13 +71,15 @@ func AcceptCampaign(ctx *gin.Context, request *models.AcceptCampaignRequest) err
 
 	go func() {
 		// update the campaign current count
-		if err := db.WithContext(ctx).
-			Model(&models.Campaign{}).
-			Where("id = ?", request.CampaignID).
-			Update("current_count", gorm.Expr("current_count + 1")).Error; err != nil {
-			log.With(zap.Error(err)).Error("Failed to increment campaign current_count")
+		if request.Accept {
+			if err := db.WithContext(ctx).
+				Model(&models.Campaign{}).
+				Where("id = ?", request.CampaignID).
+				Update("current_count", gorm.Expr("current_count + 1")).Error; err != nil {
+				log.With(zap.Error(err)).Error("Failed to increment campaign current_count")
+			}
+			log.Info("Campaign count increased")
 		}
-		log.Info("Campaign count increased")
 	}()
 
 	go func() {

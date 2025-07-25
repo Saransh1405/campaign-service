@@ -164,6 +164,7 @@ type GetCampaignRequest struct {
 }
 
 type AcceptCampaignRequest struct {
+	Accept     bool   `json:"accept" binding:"required"`
 	CampaignID string `json:"campaign_id" binding:"required"`
 	UserID     string `json:"user_id" binding:"required"`
 }

@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -43,39 +44,39 @@ func LeaveCampaign(ctx context.Context, request *models.LeaveCampaignRequest) er
 	}
 
 	// get the campaign from the redis
+	db := postgres.DB
 	var campaign models.Campaign
 	campaignKey := fmt.Sprintf("campaign:user:%s:%s", userID, request.CampaignID)
 	campaignData, err := redis_provider.Client.Get(ctx, campaignKey).Result()
-	if err != nil {
-		log.With(zap.Error(err)).Error(constants.CampaignNotFoundMessage)
-		return errors.New(constants.CampaignNotFoundMessage)
-	}
-	if err := json.Unmarshal([]byte(campaignData), &campaign); err != nil {
-		log.With(zap.Error(err)).Error(constants.CampaignNotFoundMessage)
-		return errors.New(constants.CampaignNotFoundMessage)
-	}
-
-	db := postgres.DB
-	if campaignData == "" {
-		// fetch from db
+	if err == redis.Nil {
+		// Not found in cache, fetch from DB
 		err := db.Model(&models.Campaign{}).Where("id = ?", request.CampaignID).First(&campaign).Error
 		if err != nil {
 			log.With(zap.Error(err)).Error(constants.CampaignNotFoundMessage)
 			return errors.New(constants.CampaignNotFoundMessage)
 		}
+	} else if err != nil {
+		log.With(zap.Error(err)).Error("Redis error")
+		return err // or handle as needed
+	} else {
+		// Found in cache
+		if err := json.Unmarshal([]byte(campaignData), &campaign); err != nil {
+			log.With(zap.Error(err)).Error("Failed to unmarshal campaign from cache")
+			return err
+		}
 	}
 
 	// check if the campaign has capacity
-	if campaign.MaxParticipants == campaign.MinParticipants {
+	if campaign.CurrentCount >= campaign.MaxParticipants {
 		log.With(zap.Error(errors.New(constants.CampaignFullMessage))).Error(constants.CampaignFullMessage)
 		return errors.New(constants.CampaignFullMessage)
 	}
 
 	// check if the user is in the campaign if not return error
 	err = db.Model(&models.Participant{}).Where("user_id = ? AND campaign_id = ?", userID, request.CampaignID).First(&models.Participant{}).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
+	if err == gorm.ErrRecordNotFound {
 		log.With(zap.Error(err)).Error("failed to check if user is already in the campaign")
-		return err
+		return errors.New(constants.UserNotParticipantMessage)
 	}
 
 	// send the leave activity to kafka
@@ -96,10 +97,12 @@ func LeaveCampaign(ctx context.Context, request *models.LeaveCampaignRequest) er
 	go func() {
 		// insert the status logs into the db
 		statusLog := models.StatusLogs{
-			ID:         uuid.New(),
-			CampaignID: campaign.ID,
-			Status:     "active",
-			Notes:      "user left the campaign",
+			ID:             uuid.New(),
+			CampaignID:     campaign.ID,
+			Status:         models.Active,
+			ActionByUserId: userID,
+			Notes:          "user left the campaign",
+			Timestamp:      time.Now().UnixMilli(),
 		}
 
 		err = db.Model(&models.StatusLogs{}).Create(&statusLog).Error
@@ -151,7 +154,7 @@ func SendCampaignLeaveActivityToKafka(participant models.Participant, topic stri
 
 	payload := &models.ActivityEvent{
 		Participant:      participantData,
-		Action:           "join",
+		Action:           "leave",
 		EventPublishTime: time.Now().UnixMilli(),
 	}
 

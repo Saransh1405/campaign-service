@@ -66,8 +66,8 @@ func JoinCampaign(ctx context.Context, request *models.JoinCampaignRequest) erro
 		}
 	}
 
-	// check if the campaign has capacity
-	if campaign.MaxParticipants == campaign.MinParticipants {
+	// check if campaing has capacity
+	if campaign.CurrentCount >= campaign.MaxParticipants {
 		log.With(zap.Error(errors.New(constants.CampaignFullMessage))).Error(constants.CampaignFullMessage)
 		return errors.New(constants.CampaignFullMessage)
 	}
@@ -109,10 +109,12 @@ func JoinCampaign(ctx context.Context, request *models.JoinCampaignRequest) erro
 	go func() {
 		// insert the status logs into the db
 		statusLog := models.StatusLogs{
-			ID:         uuid.New(),
-			CampaignID: campaign.ID,
-			Status:     models.Active,
-			Notes:      "user joined the campaign",
+			ID:             uuid.New(),
+			CampaignID:     campaign.ID,
+			Status:         models.Active,
+			ActionByUserId: userID,
+			Notes:          "user joined the campaign",
+			Timestamp:      time.Now().UnixMilli(),
 		}
 
 		err = db.Model(&models.StatusLogs{}).Create(&statusLog).Error
