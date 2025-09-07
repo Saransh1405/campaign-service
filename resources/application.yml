@@ -20,10 +20,14 @@ kafka:
   password: ""
 
 redis:
-  url: "redis://localhost:6379"
+  url: "redis://redis:6379"
   username: ""
   password: ""
   ratePerMinute: 2
+
+mongo:
+  url: "mongodb://mongo:27017"
+  database: "tribeWithVibe"
 
 keycloak: 
   resources: ["accounts", "business", "brands", "properties"]
