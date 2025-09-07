@@ -1,22 +1,21 @@
-# Dockerfile References: https://docs.docker.com/engine/reference/builder/
+# Use official Golang image
+FROM golang:1.23
 
-# Start from the latest golang base image
-FROM golang:latest
-
-# Add Maintainer Info
-LABEL maintainer="Rahul Sharma <rahul@3embed.com>"
-
-# Set the Current Working Directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy the source from the current directory to the Working Directory inside the container
+# Copy go.mod and go.sum first
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
 COPY . .
 
-# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
-RUN go install .
+# Build the Go app inside container
+RUN go build -o app .
 
-# Build the Go app
-RUN go build -o main .
+# Expose the app port
+EXPOSE 8002
 
-# Command to run the executable
-CMD ["./main"]
+# Run the app
+CMD ["./app"]

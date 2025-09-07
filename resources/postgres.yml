@@ -5,3 +5,4 @@ dbname: cordelia
 port: 5432
 sslmode: disable
 timeZone: Asia/Kolkata
+neondb: postgresql://neondb_owner:npg_yU6ebpSVuQ2s@ep-dark-dew-a18ujluy-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require

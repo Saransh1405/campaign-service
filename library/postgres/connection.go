@@ -4,7 +4,6 @@ import (
 	"campaign-service/models"
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 
 	"gorm.io/driver/postgres"
@@ -17,7 +16,9 @@ var SQLDB *sql.DB
 func ConnectDatabase(ctx context.Context, postgresConfig models.PostgresConfig) {
 
 	// Construct the DSN string
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s TimeZone=%s", postgresConfig.Host, postgresConfig.Port, postgresConfig.User, postgresConfig.Password, postgresConfig.DBName, postgresConfig.SSLMode, postgresConfig.TimeZone)
+	// dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s TimeZone=%s", postgresConfig.Host, postgresConfig.Port, postgresConfig.User, postgresConfig.Password, postgresConfig.DBName, postgresConfig.SSLMode, postgresConfig.TimeZone)
+
+	dsn := postgresConfig.NeonDb
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

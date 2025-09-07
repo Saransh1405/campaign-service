@@ -1,0 +1,8 @@
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb://localhost:27017."}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb://localhost:27017."}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}
+{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
+{"level":"INFO","time":"time.UnixDate","method":"main.startRouter","msg":"Running Server on port : 8002"}
