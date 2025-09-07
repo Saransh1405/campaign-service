@@ -11,14 +11,15 @@ import (
 
 func InitMongoDB() {
 	log := logger.GetLoggerWithoutContext()
-	MongoConfig, err := configs.Get(constants.MongoConfig)
 
+	applicationConfig, err := configs.Get(constants.ApplicationConfig)
 	if err != nil {
 		log.With(zap.Error(err)).Error(constants.BindingFailedErrr)
 	}
 
-	mongoUrl := MongoConfig.GetString(constants.MongoUrlKey)
-	mongoDatabase := MongoConfig.GetString(constants.MongoDatabaseKey)
+	mongoUrl := applicationConfig.GetString(constants.MongoUrl)
+	mongoDatabase := applicationConfig.GetString(constants.MongoDatabase)
+
 	if mongoUrl == "" || mongoDatabase == "" {
 		log.With(zap.Error(errors.New("configuration is missing for mongodb"))).Error("Configuration is missing for mongodb")
 	}
