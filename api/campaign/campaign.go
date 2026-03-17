@@ -15,10 +15,8 @@ import (
 )
 
 func CreateCampaign(ctx *gin.Context) {
-	//get the lang
 	lang, _ := ctx.Get(constants.LanguageString)
 
-	//get the logger
 	log := logger.GetLogger(ctx)
 
 	var request models.CreateCampaignRequest
@@ -34,16 +32,13 @@ func CreateCampaign(ctx *gin.Context) {
 		return
 	}
 
-	//sent the success message
 	successMessage := localization.GetMessage(lang, constants.SuccessMessage, nil)
 	utils.SendStatusOK(ctx, constants.IsString, successMessage, "Campaign created successfully")
 }
 
 func UpdateCampaign(ctx *gin.Context) {
-	//get the lang
 	lang, _ := ctx.Get(constants.LanguageString)
 
-	//get the logger
 	log := logger.GetLogger(ctx)
 
 	var request models.UpdateCampaignRequest
@@ -59,16 +54,13 @@ func UpdateCampaign(ctx *gin.Context) {
 		return
 	}
 
-	//sent the success message
 	successMessage := localization.GetMessage(lang, constants.SuccessMessage, nil)
 	utils.SendStatusOK(ctx, constants.IsString, successMessage, "Campaign created successfully")
 }
 
 func GetCampaign(ctx *gin.Context) {
-	//get the lang
 	lang, _ := ctx.Get(constants.LanguageString)
 
-	//get the logger
 	log := logger.GetLogger(ctx)
 
 	var request models.GetCampaignRequest
@@ -90,7 +82,6 @@ func GetCampaign(ctx *gin.Context) {
 		return
 	}
 
-	//sent the success message
 	successMessage := localization.GetMessage(lang, constants.SuccessMessage, nil)
 	utils.SendStatusWithData(ctx, constants.IsString, successMessage, result, count)
 }

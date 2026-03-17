@@ -14,36 +14,29 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetNearbyCampaigns finds campaigns near a specific location using spatial index
 func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([]*models.Campaign, int64, error) {
-	//get the logger
 	log := logger.GetLoggerWithoutContext()
 
-	//get the client name from the request
 	userID := request.UserID
 	if userID == "" {
 		log.With(zap.Error(errors.New(constants.UserNotFoundMessage))).Error(constants.UserNotFoundMessage)
 		return nil, 0, errors.New(constants.UserNotFoundMessage)
 	}
 
-	// validate the user exists
 	_, err := helperfunctions.ValidateUserExists(ctx, userID)
 	if err != nil {
 		log.With(zap.Error(err)).Error(constants.UserNotFoundMessage)
 		return nil, 0, err
 	}
 
-	// Parse location parameters from request
 	latitudeStr := request.Latitude
 	longitudeStr := request.Longitude
 	radiusStr := request.Radius
 
-	// Validate required parameters
 	if latitudeStr == "" || longitudeStr == "" {
 		return nil, 0, fmt.Errorf("latitude and longitude are required")
 	}
 
-	// Parse latitude and longitude
 	latitude, err := strconv.ParseFloat(latitudeStr, 64)
 	if err != nil {
 		return nil, 0, fmt.Errorf("invalid latitude format: %w", err)
@@ -54,7 +47,6 @@ func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([
 		return nil, 0, fmt.Errorf("invalid longitude format: %w", err)
 	}
 
-	// Parse radius (default to 10km if not provided)
 	radius := 10.0
 	if radiusStr != "" {
 		if parsedRadius, err := strconv.ParseFloat(radiusStr, 64); err == nil && parsedRadius > 0 {
@@ -62,7 +54,6 @@ func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([
 		}
 	}
 
-	// Validate coordinates
 	if latitude < -90 || latitude > 90 {
 		return nil, 0, fmt.Errorf("latitude must be between -90 and 90")
 	}
@@ -75,7 +66,6 @@ func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([
 		zap.Float64("longitude", longitude),
 		zap.Float64("radius", radius))
 
-	// Step 1: Get campaign IDs from spatial index
 	campaignIDs, err := helperfunctions.GetCampaignsInRadius(ctx, latitude, longitude, radius, "km")
 	if err != nil {
 		log.Error("Failed to get campaigns from spatial index", zap.Error(err))
@@ -89,17 +79,14 @@ func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([
 
 	log.Info("Found campaigns in spatial index", zap.Int("count", len(campaignIDs)))
 
-	// Step 2: Fetch full campaign data from PostgreSQL
 	var campaigns []*models.Campaign
 	db := postgres.DB
 
-	// Build the query with campaign IDs from spatial index
 	query := db.Model(&models.Campaign{}).
 		Preload("Location").
 		Preload("StatusLogs").
 		Where("id IN ?", campaignIDs)
 
-	// Apply additional filters from request
 	if request.Status != "" {
 		query = query.Where("status = ?", request.Status)
 	}
@@ -116,7 +103,6 @@ func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([
 		query = query.Where("price <= ?", request.MaxPrice)
 	}
 
-	// Apply location-based filters if provided
 	if request.City != "" {
 		query = query.Joins("JOIN locations ON campaigns.id = locations.campaign_id").
 			Where("locations.city = ?", request.City)
@@ -132,7 +118,6 @@ func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([
 			Where("locations.country = ?", request.Country)
 	}
 
-	// Apply date filters if provided
 	if request.StartDate != "" {
 		query = query.Where("start_date >= ?", request.StartDate)
 	}
@@ -141,7 +126,6 @@ func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([
 		query = query.Where("end_date <= ?", request.EndDate)
 	}
 
-	// Apply sorting
 	if request.SortBy != "" {
 		sortOrder := "ASC"
 		if request.SortOrder == "desc" {
@@ -161,11 +145,9 @@ func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([
 			query = query.Order("created_at DESC")
 		}
 	} else {
-		// Default sorting by creation date
 		query = query.Order("created_at DESC")
 	}
 
-	// Apply pagination
 	if request.Limit > 0 {
 		query = query.Limit(request.Limit)
 	} else {
@@ -176,17 +158,14 @@ func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([
 		query = query.Offset(request.Skip)
 	}
 
-	// Execute the query
 	if err := query.Find(&campaigns).Error; err != nil {
 		log.Error("Failed to fetch campaigns from database", zap.Error(err))
 		return nil, 0, fmt.Errorf("failed to fetch campaigns: %w", err)
 	}
 
-	// Get total count for pagination
 	var total int64
 	countQuery := db.Model(&models.Campaign{}).Where("id IN ?", campaignIDs)
 
-	// Apply the same filters for count
 	if request.Status != "" {
 		countQuery = countQuery.Where("status = ?", request.Status)
 	}
@@ -202,7 +181,6 @@ func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([
 
 	if err := countQuery.Count(&total).Error; err != nil {
 		log.Error("Failed to get total count", zap.Error(err))
-		// Don't fail the entire request for count error
 		total = int64(len(campaigns))
 	}
 
@@ -214,11 +192,9 @@ func GetNearbyCampaigns(ctx *gin.Context, request *models.GetCampaignRequest) ([
 	return campaigns, total, nil
 }
 
-// GetNearbyCampaignsSimple is a simplified version for basic nearby search
 func GetNearbyCampaignsSimple(ctx *gin.Context, latitude, longitude, radius float64, limit int) ([]*models.Campaign, error) {
 	log := logger.GetLoggerWithoutContext()
 
-	// Get campaign IDs from spatial index
 	campaignIDs, err := helperfunctions.GetCampaignsInRadius(ctx, latitude, longitude, radius, "km")
 	if err != nil {
 		log.Error("Failed to get campaigns from spatial index", zap.Error(err))
@@ -229,7 +205,6 @@ func GetNearbyCampaignsSimple(ctx *gin.Context, latitude, longitude, radius floa
 		return []*models.Campaign{}, nil
 	}
 
-	// Fetch campaigns from database
 	var campaigns []*models.Campaign
 	db := postgres.DB
 

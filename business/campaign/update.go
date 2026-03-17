@@ -21,17 +21,14 @@ import (
 )
 
 func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) error {
-	//get the logger
 	log := logger.GetLoggerWithoutContext()
 
-	//get the client name from the request
 	userID := campaign.UserID
 	if userID == "" {
 		log.With(zap.Error(errors.New(constants.UserNotFoundMessage))).Error(constants.UserNotFoundMessage)
 		return errors.New(constants.UserNotFoundMessage)
 	}
 
-	// validate the user exists
 	user, err := helperfunctions.ValidateUserExists(ctx, userID)
 	if err != nil {
 		log.With(zap.Error(err)).Error(constants.UserNotFoundMessage)
@@ -49,24 +46,20 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		// Time validation
 		currentTime := time.Now().UnixMilli()
 
 		if campaign.StartDate != nil && campaign.EndDate != nil {
 
-			// Validate start date is not in the past
 			if *campaign.StartDate < currentTime {
 				log.With(zap.Error(errors.New(constants.InvalidStartDateMessage))).Error(constants.InvalidStartDateMessage)
 				errCh <- errors.New(constants.InvalidStartDateMessage)
 			}
 
-			// Validate end date is not in the past
 			if *campaign.EndDate < currentTime {
 				log.With(zap.Error(errors.New(constants.InvalidEndDateMessage))).Error(constants.InvalidEndDateMessage)
 				errCh <- errors.New(constants.InvalidEndDateMessage)
 			}
 
-			// Validate end date is after start date
 			if *campaign.EndDate <= *campaign.StartDate {
 				log.With(zap.Error(errors.New(constants.EndDateBeforeStartDateMessage))).Error(constants.EndDateBeforeStartDateMessage)
 				errCh <- errors.New(constants.EndDateBeforeStartDateMessage)
@@ -79,7 +72,6 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		defer wg.Done()
 
 		if campaign.MaxParticipants != nil && campaign.MinParticipants != nil {
-			// Validate max participants is greater than min participants
 			if *campaign.MaxParticipants < *campaign.MinParticipants {
 				log.With(zap.Error(errors.New(constants.MaxParticipantsLessThanMinParticipants))).Error(constants.MaxParticipantsLessThanMinParticipants)
 				errCh <- errors.New(constants.MaxParticipantsLessThanMinParticipants)
@@ -92,7 +84,6 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		defer wg.Done()
 
 		if campaign.Price != nil {
-			// Validate price is greater than 0
 			if *campaign.Price <= 0 {
 				log.With(zap.Error(errors.New(constants.PriceMustBeGreaterThanZero))).Error(constants.PriceMustBeGreaterThanZero)
 				errCh <- errors.New(constants.PriceMustBeGreaterThanZero)
@@ -104,7 +95,6 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 	go func() {
 		defer wg.Done()
 
-		// Validate name is valid check in db if it already exists
 		if campaign.Name != nil {
 			db := postgres.DB
 			campaignModel := db.Model(&models.Campaign{}).Where("name = ? AND id != ?", *campaign.Name, *campaign.ID).First(&models.Campaign{})
@@ -115,19 +105,16 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		}
 	}()
 
-	// Wait for all validations to finish
 	go func() {
 		wg.Wait()
 		close(errCh)
 	}()
 
-	// Return the first error found
 	for err := range errCh {
 		log.With(zap.Error(err)).Error("Validation failed")
 		return err
 	}
 
-	// channel to store the campaign model
 	campaignModelCh := make(chan *models.Campaign, 1)
 	camapignGetErrCh := make(chan error, 1)
 
@@ -135,7 +122,6 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 	go func() {
 		defer wg.Done()
 
-		// get the campaign from the database
 		if campaign.ID != nil {
 			var existingCampaign models.Campaign
 
@@ -143,20 +129,16 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 			campaignKey := fmt.Sprintf("campaign:user:%s:%s", userID, *campaign.ID)
 			campaignData, err := redis.Get(ctx, campaignKey).Result()
 			if err == nil && campaignData != "" {
-				// Unmarshal the JSON into the struct
 				if err := json.Unmarshal([]byte(campaignData), &existingCampaign); err != nil {
 					log.With(zap.Error(err)).Error("Failed to unmarshal campaign from redis")
 				}
-				log.Info("***************get the campaign from redis****************")
 			} else {
-				// Not found in Redis, get from DB
 				db := postgres.DB
 				campaignModel := db.Model(&models.Campaign{}).Where("id = ?", *campaign.ID).First(&existingCampaign)
 				if campaignModel.Error != nil {
 					log.With(zap.Error(errors.New(constants.CampaignNotFoundMessage))).Error(constants.CampaignNotFoundMessage)
 					camapignGetErrCh <- errors.New(constants.CampaignNotFoundMessage)
 				}
-				log.Info("***************get the campaign from postgres****************")
 			}
 
 			campaignModelCh <- &existingCampaign
@@ -174,7 +156,6 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		return err
 	}
 
-	// get the campaign model
 	newCampaign := <-campaignModelCh
 
 	updateFields := make(map[string]interface{})
@@ -249,7 +230,6 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		updateFields["status"] = *campaign.Status
 	}
 
-	// Validate campaign.ID before parsing to avoid panic
 	if campaign.ID == nil || *campaign.ID == "" {
 		log.Error("campaign.ID is nil or empty, cannot parse UUID")
 		return errors.New("invalid campaign ID: cannot be nil or empty")
@@ -276,7 +256,6 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		}
 	}()
 
-	// Re-cache the updated campaign and update the user's index set
 	go func() {
 		backgroundContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
@@ -295,19 +274,16 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		}
 	}()
 
-	// Update campaign in spatial index
 	go func() {
 		backgroundContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		// Remove from spatial index first (if location changed)
 		if campaign.Location != nil {
 			if err := helperfunctions.RemoveCampaignFromSpatialIndex(backgroundContext, newCampaign.ID.String()); err != nil {
 				log.With(zap.Error(err)).Error("Failed to remove campaign from spatial index")
 			}
 		}
 
-		// Add to spatial index with new location
 		if newCampaign.Location != nil {
 			if err := helperfunctions.AddCampaignToSpatialIndex(backgroundContext, newCampaign.ID.String(), newCampaign.Location.Latitude, newCampaign.Location.Longitude); err != nil {
 				log.With(zap.Error(err)).Error("Failed to add campaign to spatial index")

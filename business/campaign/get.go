@@ -19,17 +19,14 @@ import (
 )
 
 func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interface{}, int64, error) {
-	//get the logger
 	log := logger.GetLoggerWithoutContext()
 
-	//get the client name from the request
 	userID := request.UserID
 	if userID == "" {
 		log.With(zap.Error(errors.New(constants.UserNotFoundMessage))).Error(constants.UserNotFoundMessage)
 		return nil, 0, errors.New(constants.UserNotFoundMessage)
 	}
 
-	// validate the user exists
 	user, err := helperfunctions.ValidateUserExists(ctx, userID)
 	if err != nil {
 		log.With(zap.Error(err)).Error(constants.UserNotFoundMessage)
@@ -43,7 +40,6 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 
 	redis := redis_provider.Client
 
-	// Handle single campaign ID request first
 	if request.ID != "" {
 		campaignKey := fmt.Sprintf("campaign:user:%s:%s", userID, request.ID)
 		campaignData, err := redis.Get(ctx, campaignKey).Result()
@@ -57,7 +53,6 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 		// If not found in Redis, continue to DB logic below
 	}
 
-	// Build cache key for filtered results
 	cacheKey := fmt.Sprintf("campaign:user:%s", userID)
 	if request.City != "" {
 		cacheKey += fmt.Sprintf(":city:%s", request.City)
@@ -99,7 +94,6 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 		cacheKey += fmt.Sprintf(":limit:%d", request.Limit)
 	}
 
-	// Try to get cached results for this specific query
 	cachedResult, err := redis.Get(ctx, cacheKey).Result()
 	if err == nil && cachedResult != "" {
 		var cachedResponse struct {
@@ -107,12 +101,10 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 			Total     int64             `json:"total"`
 		}
 		if err := json.Unmarshal([]byte(cachedResult), &cachedResponse); err == nil {
-			log.Info("***************get filtered campaigns from redis****************")
 			return cachedResponse.Campaigns, cachedResponse.Total, nil
 		}
 	}
 
-	// If no specific filters and no cached result, try to get from user's campaign index
 	if request.ID == "" && request.City == "" && request.State == "" && request.Country == "" &&
 		request.MinPrice == 0 && request.MaxPrice == 0 && request.StartDate == "" &&
 		request.EndDate == "" && request.Status == "" && len(request.Tags) == 0 &&
@@ -138,14 +130,12 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 					}
 				}
 				if len(campaigns) > 0 {
-					log.Info("***************get all campaigns from redis index****************")
 					return campaigns, int64(len(campaigns)), nil
 				}
 			}
 		}
 	}
 
-	// Database operation starts
 	db := postgres.DB
 	query := db.Model(&models.Campaign{}).Preload("Location").Preload("Participants").Preload("StatusLogs").Where("user_id = ?", userID)
 
@@ -177,12 +167,10 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 		query = query.Where("status = ?", request.Status)
 	}
 
-	// Handle tags filter - search campaigns that contain any of the specified tags
 	if len(request.Tags) > 0 {
 		query = query.Where("tags ?| ?", request.Tags)
 	}
 
-	// Add sorting
 	if request.SortBy != "" {
 		sortOrder := "ASC"
 		if request.SortOrder != "" {
@@ -191,17 +179,14 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 		query = query.Order(fmt.Sprintf("%s %s", request.SortBy, sortOrder))
 	}
 
-	// Execute the query
 	var campaigns []models.Campaign
 	var total int64
 
-	// Get total count
 	if err := query.Count(&total).Error; err != nil {
 		log.Error("Failed to count campaigns", zap.Error(err))
 		return nil, 0, fmt.Errorf("failed to count campaigns: %w", err)
 	}
 
-	// Get paginated results
 	if request.Skip > 0 && request.Limit > 0 {
 		offset := request.Skip
 		query = query.Offset(offset).Limit(request.Limit)
@@ -211,11 +196,8 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 		log.Error("Failed to fetch campaigns", zap.Error(err))
 		return nil, 0, fmt.Errorf("failed to fetch campaigns: %w", err)
 	}
-	log.Info("***************get the campaigns from postgres****************")
 
-	// Cache the results asynchronously
 	go func() {
-		// Cache the complete query result
 		cacheResponse := struct {
 			Campaigns []models.Campaign `json:"campaigns"`
 			Total     int64             `json:"total"`
@@ -233,7 +215,6 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 			}
 		}
 
-		// For each campaign, cache individually and add to user's index set
 		indexKey := fmt.Sprintf("campaign:user:%s:index", userID)
 		for _, campaign := range campaigns {
 			campaignKey := fmt.Sprintf("campaign:user:%s:%s", userID, campaign.ID.String())
@@ -243,23 +224,19 @@ func GetCampaign(ctx *gin.Context, request *models.GetCampaignRequest) (interfac
 				continue
 			}
 
-			// Set individual campaign with longer TTL
 			if err := redis.Set(ctx, campaignKey, campaignJSON, 30*time.Minute).Err(); err != nil {
 				log.Error("Failed to set individual campaign in redis", zap.Error(err))
 			}
 
-			// Add to user's campaign index set
 			if err := redis.SAdd(ctx, indexKey, campaign.ID.String()).Err(); err != nil {
 				log.Error("Failed to add campaign ID to user index set", zap.Error(err))
 			}
 		}
 
-		// Set TTL for the index set
 		if err := redis.Expire(ctx, indexKey, 30*time.Minute).Err(); err != nil {
 			log.Error("Failed to set TTL for user index set", zap.Error(err))
 		}
 
-		log.Info("***************cached campaigns to redis****************")
 	}()
 
 	return campaigns, total, nil

@@ -16,17 +16,14 @@ import (
 )
 
 func AcceptCampaign(ctx *gin.Context, request *models.AcceptCampaignRequest) error {
-	// get the logger
 	log := logger.GetLogger(ctx)
 
-	//get the client name from the request
 	userID := request.UserID
 	if userID == "" {
 		log.With(zap.Error(errors.New(constants.UserNotFoundMessage))).Error(constants.UserNotFoundMessage)
 		return errors.New(constants.UserNotFoundMessage)
 	}
 
-	// validate the user exists
 	user, err := helperfunctions.ValidateUserExists(ctx, userID)
 	if err != nil {
 		log.With(zap.Error(err)).Error(constants.UserNotFoundMessage)
@@ -38,24 +35,20 @@ func AcceptCampaign(ctx *gin.Context, request *models.AcceptCampaignRequest) err
 		return errors.New(constants.UserNotVerifiedMessage)
 	}
 
-	// get the campaign
 	db := postgres.DB
 
-	// check with campaign exists
 	campaignCol := db.Model(&models.Campaign{}).Where("id = ?", request.CampaignID).First(&models.Campaign{})
 	if campaignCol.Error == gorm.ErrRecordNotFound {
 		log.With(zap.Error(errors.New(constants.CampaignNotFoundMessage))).Error(constants.CampaignNotFoundMessage)
 		return errors.New(constants.CampaignNotFoundMessage)
 	}
 
-	// check with user is already a participant
 	participantCol := db.Model(&models.Participant{}).Where("user_id = ? AND campaign_id = ?", userID, request.CampaignID).First(&models.Participant{})
 	if participantCol.Error == gorm.ErrRecordNotFound {
 		log.With(zap.Error(errors.New(constants.UserNotParticipantMessage))).Error(constants.UserNotParticipantMessage)
 		return errors.New(constants.UserNotParticipantMessage)
 	}
 
-	// update the participant status
 	var status models.ParticipantStatus
 	if request.Accept {
 		status = models.ParticipantStatusActive
@@ -70,7 +63,6 @@ func AcceptCampaign(ctx *gin.Context, request *models.AcceptCampaignRequest) err
 	}
 
 	go func() {
-		// update the campaign current count
 		if request.Accept {
 			if err := db.WithContext(ctx).
 				Model(&models.Campaign{}).

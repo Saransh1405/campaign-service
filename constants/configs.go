@@ -8,6 +8,7 @@ const (
 	MongoConfig       = "mongo"
 	VaultConfig       = "vault"
 	RedisConfig       = "redis"
+	KafkaConfig       = "kafka"
 	PostgresConfig    = "postgres"
 	ImportConfig      = "import"
 	NovuConfig        = "novu"
@@ -31,14 +32,6 @@ const (
 	SwaggerHostKey                       = "swagger.host"
 	ServerHost                           = "server.host"
 	ServerPort                           = "server.port"
-	MongoUrl                             = "mongo.url"
-	MongoDatabase                        = "mongo.database"
-	KafkaHostConfigKey                   = "KAFKA_HOST"
-	KafkaUsernameConfigKey               = "kafka.username"
-	KafkaPasswordConfigKey               = "kafka.password"
-	RedisHostConfigKey                   = "redis.host"
-	RedisPortConfigKey                   = "redis.port"
-	RedisPasswordConfigKey               = "redis.password"
 )
 
 // language Config

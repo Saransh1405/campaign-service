@@ -22,9 +22,6 @@ import (
 	loggerMiddleware "campaign-service/utils/logger"
 	"time"
 
-	// grpcLib "users-service/util/grpc"
-
-	// _ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
@@ -32,35 +29,27 @@ import (
 func main() {
 	ctx := context.Background()
 
-	// Load configuration
 	godotenv.Load()
+
 	initConfigs()
 
-	// Setup custom binding validations
 	initCustomValidations()
 
-	// setup a logger
 	logger.InitLogger()
 
-	// setup http client
 	initHTTPClient()
 
-	// Connect a postgres
 	postgres.InitPostgresDB(ctx)
 
-	// Connect a kafka
-	kafka.NewConnection()
-
-	// Connect to MongoDB
-	mongoDb.InitMongoDB()
-
-	// Connect a redis
 	err := redis_provider.NewConnection(ctx, logger.GetLoggerWithoutContext())
 	if err != nil {
 		logger.GetLoggerWithoutContext().With(zap.Error(err)).Error(constants.ExternalServiceFailureError)
 	}
 
-	// Start router and Use middleware
+	mongoDb.InitMongoDB()
+
+	kafka.NewConnection()
+
 	startRouter(ctx)
 }
 

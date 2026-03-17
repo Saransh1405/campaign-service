@@ -30,7 +30,7 @@ func SetupLogging(path string, level string) {
 	}
 	logFile, err := rotatelogs.New(
 		path+".%Y%m%d",
-		rotatelogs.WithLinkName(path),
+		// rotatelogs.WithLinkName(path),
 		// rotatelogs.WithMaxAge(time.Duration(24)*time.Hour),
 		rotatelogs.WithRotationCount(2),
 	)

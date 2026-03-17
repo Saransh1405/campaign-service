@@ -15,10 +15,8 @@ import (
 )
 
 func AcceptCampaign(ctx *gin.Context) {
-	//get the lang
 	lang, _ := ctx.Get(constants.LanguageString)
 
-	//get the logger
 	log := logger.GetLogger(ctx)
 
 	var request models.AcceptCampaignRequest
@@ -34,7 +32,6 @@ func AcceptCampaign(ctx *gin.Context) {
 		return
 	}
 
-	//sent the success message
 	successMessage := localization.GetMessage(lang, constants.SuccessMessage, nil)
 	utils.SendStatusOK(ctx, constants.IsString, successMessage, "Campaign created successfully")
 }

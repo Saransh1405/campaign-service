@@ -20,7 +20,6 @@ func CreateInstance(log logger.Logger) error {
 	return nil
 }
 
-// DbContext - Helper Functions
 func GetInstance() *redis_rate.Limiter {
 	return RateLimiter
 }
@@ -28,7 +27,6 @@ func GetInstance() *redis_rate.Limiter {
 func CheckLimiter(ctx *gin.Context, key string) bool {
 	start := time.Now()
 
-	// Get log with context
 	log := logger.GetLogger(ctx)
 
 	res, err := RateLimiter.Allow(ctx, key, redis_rate.PerMinute(redis_provider.RatePerMinute))
@@ -37,7 +35,6 @@ func CheckLimiter(ctx *gin.Context, key string) bool {
 		return false
 	}
 
-	// We may get allowed = 0 if it was not allowed
 	log.Debug("redis : "+key, zap.Any("allowed", res.Allowed), zap.Any("remaining", res.Remaining))
 
 	timeElapsed := time.Since(start)

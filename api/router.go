@@ -26,7 +26,6 @@ func init() {
 	gin.SetMode(gin.ReleaseMode)
 }
 
-// GetRouter is used to get the router configured with the middlewares and the routes.
 func GetRouter(localizationMiddleware gin.HandlerFunc, loggerMiddleware gin.HandlerFunc, applicationConfig *viper.Viper) *gin.Engine {
 	router := gin.New()
 

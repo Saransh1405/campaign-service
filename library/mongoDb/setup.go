@@ -12,13 +12,13 @@ import (
 func InitMongoDB() {
 	log := logger.GetLoggerWithoutContext()
 
-	applicationConfig, err := configs.Get(constants.ApplicationConfig)
+	mongoConfig, err := configs.Get(constants.MongoConfig)
 	if err != nil {
 		log.With(zap.Error(err)).Error(constants.BindingFailedErrr)
 	}
 
-	mongoUrl := applicationConfig.GetString(constants.MongoUrl)
-	mongoDatabase := applicationConfig.GetString(constants.MongoDatabase)
+	mongoUrl := mongoConfig.GetString(constants.MongoUrl)
+	mongoDatabase := mongoConfig.GetString(constants.MongoDatabase)
 
 	if mongoUrl == "" || mongoDatabase == "" {
 		log.With(zap.Error(errors.New("configuration is missing for mongodb"))).Error("Configuration is missing for mongodb")
@@ -31,7 +31,7 @@ func InitMongoDB() {
 
 	//  	CreateIndex()
 
-	//  	 // Start watching all collections
+	// Start watching all collections
 	//   if err := WatchCollections(context.Background()); err != nil {
 	// 	log.With(zap.Error(err)).Error("Failed to initialize collection watchers")
 	// 	}

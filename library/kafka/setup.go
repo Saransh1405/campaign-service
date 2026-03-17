@@ -12,18 +12,18 @@ import (
 
 func NewConnection() {
 	// get application configs
-	applicationConfig, err := configs.Get(constants.ApplicationConfig)
+	kafkaConfig, err := configs.Get(constants.KafkaConfig)
 	if err != nil {
 		log.Fatalf("Failed to get application config: %v", err)
 	}
 
-	kafkaHost := applicationConfig.GetString(constants.KafkaHostConfigKey)
+	kafkaHost := kafkaConfig.GetString(constants.KafkaHostKey)
 	if kafkaHost == "" {
 		fmt.Println("Kafka host is not set")
 	}
 
-	kafkaUsername := applicationConfig.GetString(constants.KafkaUsernameConfigKey)
-	kafkaPassword := applicationConfig.GetString(constants.KafkaPasswordConfigKey)
+	kafkaUsername := kafkaConfig.GetString(constants.KafkaUsernameKey)
+	kafkaPassword := kafkaConfig.GetString(constants.KafkaPasswordKey)
 
 	if kafkaHost == "" {
 		kafkaHost = "kafka:9092"
@@ -36,8 +36,6 @@ func NewConnection() {
 	if kafkaPassword == "" {
 		kafkaPassword = ""
 	}
-
-	fmt.Printf("kafkaHost: %v\n", kafkaHost)
 
 	// kafka connection
 	err = Connect([]string{kafkaHost}, kafkaUsername, kafkaPassword)

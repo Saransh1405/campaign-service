@@ -35,34 +35,34 @@ func ConnectDatabase(ctx context.Context, postgresConfig models.PostgresConfig) 
 		log.Println("Connected to Postgres")
 	}
 
-	//migration of Tables
+	if postgresConfig.NeonDb == "" {
+		if postgresConfig.Host != "localhost" {
 
-	if postgresConfig.Host != "localhost" {
+			// Create enum types first
+			createEnumTypes(db)
 
-		// Create enum types first
-		createEnumTypes(db)
+			// CAMPAIGN TABLE
+			db.AutoMigrate(&models.Campaign{})
 
-		// CAMPAIGN TABLE
-		db.AutoMigrate(&models.Campaign{})
+			// LOCATION TABLE
+			db.AutoMigrate(&models.Location{})
 
-		// LOCATION TABLE
-		db.AutoMigrate(&models.Location{})
+			// PARTICIPANT TABLE
+			db.AutoMigrate(&models.Participant{})
 
-		// PARTICIPANT TABLE
-		db.AutoMigrate(&models.Participant{})
+			// CATEGORY TABLE
+			db.AutoMigrate(&models.Category{})
 
-		// CATEGORY TABLE
-		db.AutoMigrate(&models.Category{})
+			// CAMPAIGN INVITE TABLE
+			db.AutoMigrate(&models.CampaignInvite{})
 
-		// CAMPAIGN INVITE TABLE
-		db.AutoMigrate(&models.CampaignInvite{})
+			// CAMPAIGN REVIEW TABLE
+			db.AutoMigrate(&models.CampaignReview{})
 
-		// CAMPAIGN REVIEW TABLE
-		db.AutoMigrate(&models.CampaignReview{})
+			// STATUS LOGS TABLE
+			db.AutoMigrate(&models.StatusLogs{})
 
-		// STATUS LOGS TABLE
-		db.AutoMigrate(&models.StatusLogs{})
-
+		}
 	}
 
 	DB = db
@@ -70,23 +70,19 @@ func ConnectDatabase(ctx context.Context, postgresConfig models.PostgresConfig) 
 
 }
 
-// createEnumTypes creates the necessary enum types in PostgreSQL
 func createEnumTypes(db *gorm.DB) {
-	// Create CampaignStatus enum
 	db.Exec(`DO $$ BEGIN
 		CREATE TYPE campaign_status AS ENUM ('draft', 'active', 'completed', 'inactive', 'cancelled', 'full');
 	EXCEPTION
 		WHEN duplicate_object THEN null;
 	END $$;`)
 
-	// Create ParticipantStatus enum
 	db.Exec(`DO $$ BEGIN
 		CREATE TYPE participant_status AS ENUM ('pending', 'active', 'left', 'rejected');
 	EXCEPTION
 		WHEN duplicate_object THEN null;
 	END $$;`)
 
-	// Create Status enum
 	db.Exec(`DO $$ BEGIN
 		CREATE TYPE status_type AS ENUM ('Active', 'Suspended', 'Deleted', 'Inactive', 'Pending Approval', 'Rejected', 'Approved', 'Submitted');
 	EXCEPTION

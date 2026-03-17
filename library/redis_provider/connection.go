@@ -12,24 +12,20 @@ import (
 	"go.uber.org/zap"
 )
 
-// Client - Redis Connection
 var Client *redis.Client
-var RatePerMinute int = 2 // Rate per minute Default to 2
+var RatePerMinute int = 2
 
 func NewConnection(ctx context.Context, log logger.Logger) error {
-	// get application configs
-	applicationConfig, err := configs.Get(constants.ApplicationConfig)
+	redisConfig, err := configs.Get(constants.RedisConfig)
 	if err != nil {
 		log.With(zap.Error(err)).Error(constants.BindingFailedErrr)
 	}
 
-	// RedisConfig := applicationConfig.Get(constants.RedisConfig)
-
-	redisUrl := applicationConfig.GetString(constants.RedisUrlKey)
+	redisUrl := redisConfig.GetString(constants.RedisUrlKey)
 	if redisUrl == "" {
 		redisUrl = "redis:6379"
 	}
-	RatePerMinute = applicationConfig.GetInt(constants.RedisRatePerMinute)
+	RatePerMinute = redisConfig.GetInt(constants.RedisRatePerMinute)
 	if RatePerMinute == 0 {
 		RatePerMinute = 2
 	}
@@ -47,7 +43,6 @@ func NewConnection(ctx context.Context, log logger.Logger) error {
 
 	Client = redis.NewClient(opt)
 
-	// Ping to check if redis connection is working
 	_, err2 := Client.Ping(ctx).Result()
 	if err2 != nil {
 		return err2
@@ -58,7 +53,6 @@ func NewConnection(ctx context.Context, log logger.Logger) error {
 	return nil
 }
 
-// RedisClient - Helper Functions
 func RedisClient() *redis.Client {
 	return Client
 }
