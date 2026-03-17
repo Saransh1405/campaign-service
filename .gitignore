@@ -46,6 +46,8 @@ Thumbs.db
 *.avi
 *.flv
 *.mov
-*.env
-*.env
 
+# Environment files
+.env
+*.env
+!.env.sample
