@@ -3,6 +3,7 @@ package kafka
 import (
 	"campaign-service/constants"
 	"campaign-service/utils/configs"
+	"fmt"
 	"log"
 )
 
@@ -18,10 +19,25 @@ func NewConnection() {
 
 	kafkaHost := applicationConfig.GetString(constants.KafkaHostConfigKey)
 	if kafkaHost == "" {
-		log.Fatalf("Kafka host is not set")
+		fmt.Println("Kafka host is not set")
 	}
+
 	kafkaUsername := applicationConfig.GetString(constants.KafkaUsernameConfigKey)
 	kafkaPassword := applicationConfig.GetString(constants.KafkaPasswordConfigKey)
+
+	if kafkaHost == "" {
+		kafkaHost = "kafka:9092"
+	}
+
+	if kafkaUsername == "" {
+		kafkaUsername = ""
+	}
+
+	if kafkaPassword == "" {
+		kafkaPassword = ""
+	}
+
+	fmt.Printf("kafkaHost: %v\n", kafkaHost)
 
 	// kafka connection
 	err = Connect([]string{kafkaHost}, kafkaUsername, kafkaPassword)

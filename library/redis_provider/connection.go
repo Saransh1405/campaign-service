@@ -26,9 +26,12 @@ func NewConnection(ctx context.Context, log logger.Logger) error {
 	// RedisConfig := applicationConfig.Get(constants.RedisConfig)
 
 	redisUrl := applicationConfig.GetString(constants.RedisUrlKey)
-	RatePerMinute = applicationConfig.GetInt(constants.RedisRatePerMinute)
 	if redisUrl == "" {
-		return errors.New("configuration is missing for redis")
+		redisUrl = "redis:6379"
+	}
+	RatePerMinute = applicationConfig.GetInt(constants.RedisRatePerMinute)
+	if RatePerMinute == 0 {
+		RatePerMinute = 2
 	}
 
 	opt, err := redis.ParseURL(redisUrl)

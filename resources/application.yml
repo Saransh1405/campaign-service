@@ -14,16 +14,16 @@ server :
   host: "http://localhost:8002"
   port: 8002
 
-kafka:
-  host: "kafka:9092"
-  username: ""
-  password: ""
+# kafka:
+#   host: "kafka:9092"
+#   username: ""
+#   password: ""
 
-redis:
-  url: "redis://redis:6379"
-  username: ""
-  password: ""
-  ratePerMinute: 2
+# redis:
+#   url: "redis://redis:6379"
+#   username: ""
+#   password: ""
+#   ratePerMinute: 2
 
 mongo:
   url: "mongodb://mongo:27017"
