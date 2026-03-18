@@ -48,3 +48,8 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Environment files (keep local secrets out of git)
+.env
+*.env
+!.env.sample
+
