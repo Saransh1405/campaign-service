@@ -4,7 +4,6 @@ import (
 	"campaign-service/api"
 	"campaign-service/constants"
 	"campaign-service/library/kafka"
-	"campaign-service/library/mongoDb"
 	"campaign-service/library/postgres"
 	"campaign-service/library/redis_provider"
 	"campaign-service/logger"
@@ -46,7 +45,7 @@ func main() {
 		logger.GetLoggerWithoutContext().With(zap.Error(err)).Error(constants.ExternalServiceFailureError)
 	}
 
-	mongoDb.InitMongoDB()
+	// mongoDb.InitMongoDB()
 
 	kafka.NewConnection()
 
@@ -68,13 +67,12 @@ func initCustomValidations() {
 func initHTTPClient() {
 
 	log := logger.GetLoggerWithoutContext()
-	// get application configs
+
 	applicationConfig, err := configs.Get(constants.ApplicationConfig)
 	if err != nil {
 		log.With(zap.Error(err)).Error(constants.BindingFailedErrr)
 	}
 
-	// init http client
 	err = httpclient.Init(httpclient.Config{
 		ConnectTimeout: time.Millisecond *
 			applicationConfig.GetDuration(constants.HTTPConnectTimeoutInMillisKey),
@@ -97,25 +95,20 @@ func initHTTPClient() {
 
 func startRouter(ctx context.Context) {
 
-	// set a middleware options for a logger
 	logMiddleware := loggerMiddleware.LoggerMiddlewareOptions{
 		NotLogQueryParams:  true,
 		NotLogHeaderParams: true,
 	}
 
-	// get logger
 	logger := logger.GetLoggerWithoutContext()
 
-	// get application config
 	applicationConfig, err1 := configs.Get(constants.ApplicationConfig)
 	if err1 != nil {
 		logger.With(zap.Error(err1)).Error(constants.BindingFailedErrr)
 	}
 
-	// get router
 	router := api.GetRouter(localization.LoadBundle(""), loggerMiddleware.Logger(logMiddleware), applicationConfig)
 
-	// now start router
 	serverPort := applicationConfig.GetInt(constants.ServerPort)
 	logger.Info(fmt.Sprintf("Running Server on port : %v", serverPort))
 

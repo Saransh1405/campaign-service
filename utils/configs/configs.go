@@ -27,6 +27,12 @@ func Init(path string) {
 
 // Get is used to get the instance to the config provider for the configuration name
 func Get(name string) (*viper.Viper, error) {
+	if p == nil {
+		return nil, fmt.Errorf("configs not initialized: call configs.Init() first")
+	}
+	if baseConfigPath == "" {
+		return nil, fmt.Errorf("configs not initialized: base config path is empty")
+	}
 
 	p.mu.Lock()
 	defer p.mu.Unlock()

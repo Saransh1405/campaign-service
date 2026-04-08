@@ -7,6 +7,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -14,19 +16,13 @@ import (
 	"golang.org/x/text/language"
 )
 
-// Bundle - to log output on console.
 var Bundle *i18n.Bundle
+var bundleOnce sync.Once
+var supportedLanguages []string
 
 func GetLocalizer(ctx context.Context) *i18n.Localizer {
-	log := logger.GetLoggerWithoutContext()
-	lan := constants.DefaultLanguage
-	Bundle = i18n.NewBundle(language.Make(lan))
-	Bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
-	_, err := Bundle.LoadMessageFile(fmt.Sprintf(constants.LanguageJsonFilePath, lan))
-	if err != nil {
-		log.With(zap.Error(err)).Error(constants.BindingFailedErrr)
-	}
-	return i18n.NewLocalizer(Bundle, lan)
+	ensureBundle("")
+	return i18n.NewLocalizer(Bundle, constants.DefaultLanguage)
 }
 
 func GetMessageWithoutTemplate(localizer *i18n.Localizer, id string) string {
@@ -38,57 +34,99 @@ func GetMessageWithoutTemplate(localizer *i18n.Localizer, id string) string {
 	return message
 }
 
-// LoadBundle local locales file.
-func LoadBundle(path string) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		// Initialize i18n
-		lan := constants.DefaultLanguage
-		Bundle = i18n.NewBundle(language.Make(lan))
+func ensureBundle(path string) {
+	bundleOnce.Do(func() {
+		log := logger.GetLoggerWithoutContext()
+		defaultLang := constants.DefaultLanguage
+
+		supportedLanguages = []string{defaultLang}
+
+		LanguageConfig, err := configs.Get(constants.LanguageConfig)
+		if err != nil {
+			log.With(zap.Error(err)).Warn("failed to load language config; falling back to default language")
+		} else if LanguageConfig != nil {
+			langs := LanguageConfig.GetStringSlice(constants.LanguageListKey)
+			if len(langs) > 0 {
+				// Deduplicate + trim and ensure default exists.
+				seen := make(map[string]struct{}, len(langs)+1)
+				res := make([]string, 0, len(langs)+1)
+				add := func(l string) {
+					l = strings.TrimSpace(l)
+					if l == "" {
+						return
+					}
+					if _, ok := seen[l]; ok {
+						return
+					}
+					seen[l] = struct{}{}
+					res = append(res, l)
+				}
+
+				add(defaultLang)
+				for _, l := range langs {
+					add(l)
+				}
+				supportedLanguages = res
+			}
+		}
+
+		Bundle = i18n.NewBundle(language.Make(defaultLang))
 		Bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
-		LanguageConfig, _ := configs.Get(constants.LanguageConfig)
-		LanguageList := LanguageConfig.GetStringSlice(constants.LanguageListKey)
-
-		LL := make([]string, len(LanguageList))
-		for i, v := range LanguageList {
-			LL[i] = fmt.Sprint(v)
-		}
-		log := logger.GetLoggerWithoutContext()
-		log.Info(fmt.Sprintf("Language List %v", LL))
-		for _, lang := range LL {
+		for _, lang := range supportedLanguages {
+			var filePattern string
 			if path != "" {
-				Bundle.MustLoadMessageFile(fmt.Sprintf(path+"locales/%v.json", lang))
+				filePattern = path + "locales/%v.json"
 			} else {
-				Bundle.MustLoadMessageFile(fmt.Sprintf("locales/%v.json", lang))
+				filePattern = "locales/%v.json"
 			}
 
+			file := fmt.Sprintf(filePattern, lang)
+			if _, err := Bundle.LoadMessageFile(file); err != nil {
+				// Missing locale files should not crash the service.
+				log.With(zap.Error(err), zap.String("lang", lang), zap.String("file", file)).
+					Warn("failed to load locale file")
+			}
 		}
-		ctx.Set("language", lan)
+	})
+}
+
+func LoadBundle(path string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ensureBundle(path)
+
+		lan := constants.DefaultLanguage
+		if headerLang := strings.TrimSpace(ctx.GetHeader(constants.LanguageString)); headerLang != "" {
+			if pos(supportedLanguages, headerLang) != -1 {
+				lan = headerLang
+			}
+		}
+		ctx.Set(constants.LanguageString, lan)
 	}
 }
 
-// GetMessage get message from local file.
 func GetMessage(lang interface{}, id string, templateData interface{}) string {
+	ensureBundle("")
 
-	log := logger.GetLoggerWithoutContext()
-	language := constants.DefaultLanguage
+	selectedLang := constants.DefaultLanguage
 	if lang != nil {
-		language = lang.(string)
-	}
-	languageString := []string{}
-	LanguageConfig, err := configs.Get(constants.LanguageConfig)
-	if err != nil {
-		log.With(zap.Error(err)).Error(constants.BindingFailedErrr)
-	}
-
-	languageString = LanguageConfig.GetStringSlice(constants.LanguageListKey)
-
-	if pos(languageString, language) == -1 {
-		language = constants.DefaultLanguage
+		if s, ok := lang.(string); ok {
+			s = strings.TrimSpace(s)
+			if s != "" {
+				selectedLang = s
+			}
+		}
 	}
 
-	localizer := i18n.NewLocalizer(Bundle, language)
+	if pos(supportedLanguages, selectedLang) == -1 {
+		selectedLang = constants.DefaultLanguage
+	}
 
+	if Bundle == nil {
+		return id
+	}
+
+	localizer := i18n.NewLocalizer(Bundle, selectedLang)
 	message, err := localizer.Localize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID: id,
@@ -96,7 +134,7 @@ func GetMessage(lang interface{}, id string, templateData interface{}) string {
 		TemplateData: templateData,
 	})
 	if err != nil || message == "" {
-		message = id
+		return id
 	}
 	return message
 }

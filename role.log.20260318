@@ -1,7 +1,0 @@
-{"level":"ERROR","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Failed to parse Redis URL","error":"redis: invalid URL scheme: redis-15245.crce286.ap-south-1-1.ec2.cloud.redislabs.com","redisUrl":"redis-15245.crce286.ap-south-1-1.ec2.cloud.redislabs.com:15245"}
-{"level":"ERROR","time":"time.UnixDate","method":"main.main","msg":"external service failure error","error":"failed to parse Redis URL: redis: invalid URL scheme: redis-15245.crce286.ap-south-1-1.ec2.cloud.redislabs.com"}
-{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb+srv://GoFood:chiya123@cluster0.3ekrpok.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0."}
-{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}
-{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/redis_provider.NewConnection","msg":"Connected to Redis."}
-{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.NewConnection","msg":"Connected to MONGODB_URL : mongodb+srv://GoFood:chiya123@cluster0.3ekrpok.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0."}
-{"level":"INFO","time":"time.UnixDate","method":"campaign-service/library/mongoDb.InitMongoDB","msg":"MongoDB connection established"}

@@ -14,48 +14,40 @@ func Connect(brokerList []string, KafkaUsername, KafkaPassword string) error {
 	config.Producer.Retry.Max = 5
 	config.Producer.Return.Successes = true
 
-	// Only enable SASL if username and password are provided
 	if KafkaUsername != "" && KafkaPassword != "" {
 		config.Net.SASL.Enable = true
 		config.Net.SASL.User = KafkaUsername
 		config.Net.SASL.Password = KafkaPassword
 	} else {
-		// Disable SASL for local development
 		config.Net.SASL.Enable = false
 	}
 
-	// Create campaign producer
 	createCampaignProducer, err := sarama.NewSyncProducer(brokerList, config)
 	if err != nil {
 		log.Fatalf("Failed to create campaign producer: %v", err)
 	}
 	campaign.Producer = createCampaignProducer
 
-	// Create update campaign producer
 	updateCampaignProducer, err := sarama.NewSyncProducer(brokerList, config)
 	if err != nil {
 		log.Fatalf("Failed to create update campaign producer: %v", err)
 	}
 	campaign.Producer = updateCampaignProducer
 
-	// Create campaign activity producer
 	campaignActivityProducer, err := sarama.NewSyncProducer(brokerList, config)
 	if err != nil {
 		log.Fatalf("Failed to create campaign activity producer: %v", err)
 	}
 	activity.ActivityProducer = campaignActivityProducer
 
-	// Start consumers in background
 	config.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRange()
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 
 	go func() {
-		// Start Campaign Kafka consumers
 		if err := campaign.StartConsumers(brokerList, config); err != nil {
 			log.Printf("Error starting campaign consumers: %v", err)
 		}
 
-		// Start campaign activity consumers
 		if err := activity.StartActivityConsumer(brokerList, config); err != nil {
 			log.Printf("Error starting campaign activity consumers: %v", err)
 		}

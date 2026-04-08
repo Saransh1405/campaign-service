@@ -56,7 +56,6 @@ func ConsumerCreateCampaign(brokers []string, config *sarama.Config) error {
 					continue
 				}
 
-				// Convert event.Campaign (map[string]interface{}) to models.Campaign
 				campaignData, err := json.Marshal(event.Campaign)
 				if err != nil {
 					lastError = err
@@ -126,7 +125,6 @@ func ConsumerUpdateCampaign(brokers []string, config *sarama.Config) error {
 					continue
 				}
 
-				// event.Campaign and event.UpdateFields are already map[string]interface{}
 				if err := campaigns.UpdateCampaignInPostgres(event.Campaign, event.UpdateFields); err != nil {
 					lastError = err
 					time.Sleep(time.Duration(attempt+1) * time.Second)

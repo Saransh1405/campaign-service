@@ -11,7 +11,6 @@ import (
 // kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 --topic campaign_activity
 
 func NewConnection() {
-	// get application configs
 	kafkaConfig, err := configs.Get(constants.KafkaConfig)
 	if err != nil {
 		log.Fatalf("Failed to get application config: %v", err)
@@ -37,7 +36,6 @@ func NewConnection() {
 		kafkaPassword = ""
 	}
 
-	// kafka connection
 	err = Connect([]string{kafkaHost}, kafkaUsername, kafkaPassword)
 	if err != nil {
 		log.Fatalf("Failed to connect to Kafka: %v", err)

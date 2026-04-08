@@ -27,16 +27,16 @@ func CreateCampaign(ctx *gin.Context, campaign *models.CreateCampaignRequest) er
 		return errors.New(constants.UserNotFoundMessage)
 	}
 
-	user, err := helperfunctions.ValidateUserExists(ctx, userID)
-	if err != nil {
-		log.With(zap.Error(err)).Error(constants.UserNotFoundMessage)
-		return err
-	}
+	// user, err := helperfunctions.ValidateUserExists(ctx, userID)
+	// if err != nil {
+	// 	log.With(zap.Error(err)).Error(constants.UserNotFoundMessage)
+	// 	return err
+	// }
 
-	if !user.EmailVerified {
-		log.With(zap.Error(errors.New(constants.UserNotVerifiedMessage))).Error(constants.UserNotVerifiedMessage)
-		return errors.New(constants.UserNotVerifiedMessage)
-	}
+	// if !user.EmailVerified {
+	// 	log.With(zap.Error(errors.New(constants.UserNotVerifiedMessage))).Error(constants.UserNotVerifiedMessage)
+	// 	return errors.New(constants.UserNotVerifiedMessage)
+	// }
 
 	var wg sync.WaitGroup
 	errCh := make(chan error, 5)

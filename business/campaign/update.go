@@ -7,8 +7,6 @@ import (
 	"campaign-service/library/redis_provider"
 	"campaign-service/logger"
 	"campaign-service/models"
-	"campaign-service/utils/helperfunctions"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -29,16 +27,16 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		return errors.New(constants.UserNotFoundMessage)
 	}
 
-	user, err := helperfunctions.ValidateUserExists(ctx, userID)
-	if err != nil {
-		log.With(zap.Error(err)).Error(constants.UserNotFoundMessage)
-		return err
-	}
+	// user, err := helperfunctions.ValidateUserExists(ctx, userID)
+	// if err != nil {
+	// 	log.With(zap.Error(err)).Error(constants.UserNotFoundMessage)
+	// 	return err
+	// }
 
-	if !user.EmailVerified {
-		log.With(zap.Error(errors.New(constants.UserNotVerifiedMessage))).Error(constants.UserNotVerifiedMessage)
-		return errors.New(constants.UserNotVerifiedMessage)
-	}
+	// if !user.EmailVerified {
+	// 	log.With(zap.Error(errors.New(constants.UserNotVerifiedMessage))).Error(constants.UserNotVerifiedMessage)
+	// 	return errors.New(constants.UserNotVerifiedMessage)
+	// }
 
 	var wg sync.WaitGroup
 	errCh := make(chan error, 5)
@@ -247,49 +245,15 @@ func UpdateCampaign(ctx *gin.Context, campaign *models.UpdateCampaignRequest) er
 		}
 	}()
 
-	go func() {
-		backgroundContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		if err := helperfunctions.InvalidateAllCampaignUserCache(backgroundContext, userID); err != nil {
-			log.With(zap.Error(err)).Error("Failed to invalidate campaign user cache")
-		}
-	}()
-
-	go func() {
-		backgroundContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		campaignKey := fmt.Sprintf("campaign:user:%s:%s", userID, *campaign.ID)
-		campaignJSON, err := json.Marshal(newCampaign)
-		if err != nil {
-			log.With(zap.Error(err)).Error("Failed to marshal updated campaign for Redis")
-			return
-		}
-		if err := redis_provider.Client.Set(backgroundContext, campaignKey, campaignJSON, 15*time.Minute).Err(); err != nil {
-			log.With(zap.Error(err)).Error("Failed to set updated campaign in Redis")
-		}
-		if err := helperfunctions.AddCampaignToUserIndex(backgroundContext, userID, *campaign.ID); err != nil {
-			log.With(zap.Error(err)).Error("Failed to add campaign ID to user index set")
-		}
-	}()
-
-	go func() {
-		backgroundContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		if campaign.Location != nil {
-			if err := helperfunctions.RemoveCampaignFromSpatialIndex(backgroundContext, newCampaign.ID.String()); err != nil {
-				log.With(zap.Error(err)).Error("Failed to remove campaign from spatial index")
-			}
-		}
-
-		if newCampaign.Location != nil {
-			if err := helperfunctions.AddCampaignToSpatialIndex(backgroundContext, newCampaign.ID.String(), newCampaign.Location.Latitude, newCampaign.Location.Longitude); err != nil {
-				log.With(zap.Error(err)).Error("Failed to add campaign to spatial index")
-			}
-		}
-	}()
+	campaignKey := fmt.Sprintf("campaign:user:%s:%s", userID, newCampaign.ID.String())
+	campaignJSON, err := json.Marshal(newCampaign)
+	if err != nil {
+		log.With(zap.Error(err)).Error("Failed to marshal updated campaign for Redis")
+		return fmt.Errorf("failed to marshal updated campaign for Redis: %w", err)
+	}
+	if err := redis_provider.Client.Set(ctx, campaignKey, campaignJSON, 15*time.Minute).Err(); err != nil {
+		log.With(zap.Error(err)).Error("Failed to set updated campaign in Redis")
+	}
 
 	return nil
 }
@@ -317,8 +281,6 @@ func PublishUpdateDataToKafka(campaignEvent models.Campaign, updateFields map[st
 		"updated_at":       campaignEvent.UpdatedAt,
 		"user_id":          campaignEvent.UserID,
 	}
-
-	fmt.Printf("updateFields: %v\n", updateFields)
 
 	payload := &models.CampaignEvent{
 		Campaign:         campaignData,

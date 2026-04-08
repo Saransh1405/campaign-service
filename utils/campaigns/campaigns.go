@@ -18,14 +18,12 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 
 	db := postgres.DB
 
-	// start a transaction
 	tx := db.Begin()
 	if tx.Error != nil {
 		log.Error("Error in starting transaction", zap.Error(tx.Error))
 		return fmt.Errorf("failed to start transaction: %w", tx.Error)
 	}
 
-	// create the campaign object
 	campaign := models.Campaign{
 		ID:              campaignData.ID,
 		UserID:          campaignData.UserID,
@@ -54,7 +52,6 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 		return fmt.Errorf("failed to save campaign: %w", result.Error)
 	}
 
-	// create the location object
 	location := models.Location{
 		ID:         uuid.New(),
 		CampaignID: campaignData.ID,
@@ -75,14 +72,13 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 		return fmt.Errorf("failed to save location: %w", result.Error)
 	}
 
-	// create the status logs object
 	statusLogs := models.StatusLogs{
 		ID:             uuid.New(),
 		CampaignID:     campaignData.ID,
-		Status:         models.Active, // Use enum instead of string
+		Status:         models.Active,
 		Notes:          "Campaign created",
 		ActionByUserId: campaignData.UserID,
-		Timestamp:      time.Now().UnixMilli(), // Use int64 timestamp
+		Timestamp:      time.Now().UnixMilli(),
 	}
 	if result := db.Create(&statusLogs); result.Error != nil {
 		tx.Rollback()
@@ -103,7 +99,6 @@ func InsertIntoPostgres(campaignData models.Campaign) error {
 func UpdateCampaignInPostgres(campaignData map[string]interface{}, updateFields map[string]interface{}) error {
 	log := logger.GetLoggerWithoutContext()
 
-	// Initialize updateFields if it's nil
 	if updateFields == nil {
 		updateFields = make(map[string]interface{})
 		fmt.Printf("updateFields: %v\n", updateFields)
@@ -123,30 +118,24 @@ func UpdateCampaignInPostgres(campaignData map[string]interface{}, updateFields 
 
 	db := postgres.DB
 
-	// start a transaction
 	tx := db.Begin()
 	if tx.Error != nil {
 		log.Error("Error in starting transaction", zap.Error(tx.Error))
 		return fmt.Errorf("failed to start transaction: %w", tx.Error)
 	}
 
-	// Remove location from updateFields since it's handled separately
 	delete(updateFields, "location")
 
-	// update the tags as jsonb
 	updateFields["tags"] = json.RawMessage(campaign.Tags)
 
-	// Add updated_at timestamp
 	updateFields["updated_at"] = time.Now().UnixMilli()
 
-	// Update the campaign with only the changed fields
 	if result := db.Model(&models.Campaign{}).Where("id = ?", campaign.ID).Updates(updateFields); result.Error != nil {
 		log.Error("Error in updating campaign", zap.Error(result.Error))
 		tx.Rollback()
 		return fmt.Errorf("failed to update campaign: %w", result.Error)
 	}
 
-	// Update location if provided
 	if campaign.Location != nil {
 		locationUpdate := map[string]interface{}{
 			"name":       campaign.Location.Name,
@@ -167,11 +156,10 @@ func UpdateCampaignInPostgres(campaignData map[string]interface{}, updateFields 
 		}
 	}
 
-	// Add status log entry
 	statusLogs := models.StatusLogs{
 		ID:             uuid.New(),
 		CampaignID:     campaign.ID,
-		Status:         models.Active, // Use lowercase string to match enum
+		Status:         models.Active,
 		Notes:          "Campaign updated",
 		ActionByUserId: campaign.UserID,
 		Timestamp:      time.Now().UnixMilli(),
@@ -189,5 +177,6 @@ func UpdateCampaignInPostgres(campaignData map[string]interface{}, updateFields 
 	}
 
 	log.Info("Campaign updated successfully in database")
+
 	return nil
 }
